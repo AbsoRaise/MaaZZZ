@@ -5,6 +5,7 @@ from maa.toolkit import Toolkit
 
 import my_action
 import my_reco
+import zzz_disk_action
 
 
 def main():

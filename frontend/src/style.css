@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  background: #09090b;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #09090b;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+@layer components {
+  .hard-button {
+    @apply rounded-sm border-2 border-zinc-500 bg-zinc-950 px-4 py-2 text-center font-mono text-xs font-black text-zinc-100 transition duration-100 hover:-translate-y-0.5 hover:border-[#f6ce00] hover:text-[#f6ce00] active:translate-y-0 disabled:cursor-not-allowed disabled:translate-y-0 disabled:border-zinc-700 disabled:text-zinc-600 disabled:opacity-60;
+  }
+
+  .hard-button-active {
+    @apply border-[#f6ce00] bg-[#f6ce00] text-zinc-950 hover:text-zinc-950;
+  }
+
+  .panel {
+    @apply rounded-sm border-4 border-zinc-700 bg-zinc-900;
+  }
+
+  .panel-title {
+    @apply border-b-4 border-zinc-800 px-4 py-3 font-mono text-xs font-black uppercase tracking-widest text-[#f6ce00];
+  }
+
+  .hard-input {
+    @apply rounded-sm border-2 border-zinc-700 bg-zinc-950 px-3 py-2 font-mono text-xs font-black text-zinc-100 outline-none transition duration-100 placeholder:text-zinc-600 focus:border-[#f6ce00] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .field-label {
+    @apply font-mono text-[11px] font-black tracking-wide text-zinc-500;
+  }
+
+  .metric-box {
+    @apply min-w-0 rounded-sm border-2 border-zinc-800 bg-zinc-950 p-3;
+  }
+
+  .metric-box span {
+    @apply block truncate font-mono text-[10px] font-black uppercase text-zinc-500;
+  }
+
+  .metric-box strong {
+    @apply mt-1 block truncate font-mono text-2xl font-black text-[#f6ce00];
+  }
+
+  .debug-info-box {
+    @apply min-w-0 rounded-sm border-2 border-zinc-800 bg-zinc-950 p-3;
+  }
+
+  .debug-info-box span {
+    @apply block font-mono text-[10px] font-black text-zinc-500;
+  }
+
+  .debug-info-box strong {
+    @apply mt-2 block max-w-full whitespace-pre-wrap break-all font-mono text-sm font-black leading-relaxed text-[#f6ce00] sm:break-words;
+  }
+
+  .debug-pre {
+    @apply mt-3 max-h-64 max-w-full overflow-auto whitespace-pre-wrap break-all rounded-sm border border-zinc-800 bg-zinc-900 p-3 text-[11px] leading-relaxed text-zinc-300 sm:break-words;
+  }
+
+  .slot-box {
+    @apply rounded-sm border-2 border-zinc-800 bg-zinc-950 p-2 text-center font-mono font-black;
+  }
+
+  .slot-box span {
+    @apply block text-[10px] text-zinc-500;
+  }
+
+  .slot-box strong {
+    @apply block text-sm text-[#f6ce00];
+  }
+
+  .notice-box {
+    @apply break-words rounded-sm border-2 bg-zinc-950 p-3 font-mono text-xs font-black;
+  }
+
+  .disk-card {
+    @apply min-w-0 rounded-sm border-4 border-zinc-800 bg-zinc-950 p-3 transition duration-100 hover:-translate-y-0.5 hover:border-[#f6ce00];
+  }
+
+  .disk-vinyl {
+    @apply h-16 w-16 shrink-0 rounded-sm border-4 border-zinc-800;
+  }
+
+  .reason-chip {
+    @apply max-w-full truncate rounded-sm border-2 border-zinc-700 bg-zinc-900 px-2 py-1 font-mono text-[11px] font-black text-zinc-300;
+  }
+
+  .empty-state {
+    @apply border-4 border-dashed border-zinc-800 bg-zinc-950 p-8 text-center font-mono text-xs font-black text-zinc-500;
+  }
+
+  .stat-choice {
+    @apply mb-2 mr-2 rounded-sm border-2 border-zinc-700 bg-zinc-900 px-2 py-1 font-mono text-[11px] font-black text-zinc-300 transition duration-100 hover:border-[#f6ce00] hover:text-[#f6ce00];
+  }
+
+  .stat-choice-active {
+    @apply border-[#f6ce00] bg-[#f6ce00] text-zinc-950 hover:text-zinc-950;
+  }
+
+  .disk-rarity-s {
+    @apply border-[#f6ce00] hover:border-yellow-300;
+  }
+
+  .disk-rarity-a {
+    @apply border-purple-500 hover:border-purple-300;
+  }
+
+  .disk-rarity-b {
+    @apply border-sky-500 hover:border-sky-300;
+  }
+}

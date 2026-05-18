@@ -1,0 +1,12 @@
+{
+    "ScanDisks": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "ScanDiskInventory",
+        "custom_action_param": {
+            "profile": "config/scan_profile.json",
+            "output": "output/latest_scan.json"
+        },
+        "next": []
+    }
+}
