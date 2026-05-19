@@ -200,6 +200,37 @@ function getApi() {
   return window?.pywebview?.api || null;
 }
 
+function waitForApi(timeoutMs = 3000) {
+  const existing = getApi();
+  if (existing) return Promise.resolve(existing);
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const startedAt = Date.now();
+
+    const finish = (api) => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener('pywebviewready', handleReady);
+      resolve(api || null);
+    };
+
+    const handleReady = () => finish(getApi());
+
+    const poll = () => {
+      const api = getApi();
+      if (api || Date.now() - startedAt >= timeoutMs) {
+        finish(api);
+        return;
+      }
+      window.setTimeout(poll, 80);
+    };
+
+    window.addEventListener('pywebviewready', handleReady, { once: true });
+    poll();
+  });
+}
+
 function isEnvelope(response) {
   return (
     response &&
@@ -582,7 +613,10 @@ function rankLabel(rank) {
   return labels[rank] || rank || '-';
 }
 
-onMounted(loadInitialData);
+onMounted(async () => {
+  await waitForApi();
+  await loadInitialData();
+});
 </script>
 
 <template>

@@ -29,8 +29,8 @@ const fallbackDisks = [
     slot: 5,
     main_stat: { name: '冲击力', value: 18 },
     sub_stats: [
-      { name: '暴击率', value: 2.4 },
-      { name: '攻击力', value: 38 },
+      { name: '暴击率', value: 2.4, upgrade_count: 1 },
+      { name: '攻击力', value: 38, upgrade_count: 0 },
     ],
     inventory_pos: { page: 1, row: 2, col: 3 },
   },
@@ -43,8 +43,8 @@ const fallbackDisks = [
     slot: 4,
     main_stat: { name: '异常精通', value: 30 },
     sub_stats: [
-      { name: '暴击伤害', value: 4.8 },
-      { name: '穿透值', value: 18 },
+      { name: '暴击伤害', value: 4.8, upgrade_count: 2 },
+      { name: '穿透值', value: 18, upgrade_count: 0 },
     ],
     inventory_pos: { page: 1, row: 3, col: 1 },
   },
@@ -57,8 +57,8 @@ const fallbackDisks = [
     slot: 6,
     main_stat: { name: '攻击力', value: 30 },
     sub_stats: [
-      { name: '暴击率', value: 2.4 },
-      { name: '暴击伤害', value: 4.8 },
+      { name: '暴击率', value: 2.4, upgrade_count: 0 },
+      { name: '暴击伤害', value: 4.8, upgrade_count: 1 },
     ],
     inventory_pos: { page: 2, row: 1, col: 4 },
   },
@@ -85,6 +85,8 @@ const metadata = ref(DEFAULT_METADATA);
 const characterBuilds = ref({});
 const currentPage = ref(1);
 const pageSize = 12;
+const historyPage = ref(1);
+const historyPageSize = 8;
 const filters = ref({
   diskType: '',
   rarity: '',
@@ -122,6 +124,12 @@ const pagedDisks = computed(() => {
   const start = (displayPage.value - 1) * pageSize;
   return filteredDisks.value.slice(start, start + pageSize);
 });
+const historyTotalPages = computed(() => Math.max(1, Math.ceil(history.value.length / historyPageSize)));
+const historyDisplayPage = computed(() => Math.min(historyPage.value, historyTotalPages.value));
+const pagedHistory = computed(() => {
+  const start = (historyDisplayPage.value - 1) * historyPageSize;
+  return history.value.slice(start, start + historyPageSize);
+});
 const statOptions = computed(() => {
   const values = new Set([...(metadata.value.main_stats || []), ...(metadata.value.sub_stats || [])]);
   visibleDisks.value.forEach((disk) => {
@@ -139,6 +147,37 @@ const diskTypeOptions = computed(() => {
 
 function getApi() {
   return window?.pywebview?.api || null;
+}
+
+function waitForApi(timeoutMs = 3000) {
+  const existing = getApi();
+  if (existing) return Promise.resolve(existing);
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const startedAt = Date.now();
+
+    const finish = (api) => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener('pywebviewready', handleReady);
+      resolve(api || null);
+    };
+
+    const handleReady = () => finish(getApi());
+
+    const poll = () => {
+      const api = getApi();
+      if (api || Date.now() - startedAt >= timeoutMs) {
+        finish(api);
+        return;
+      }
+      window.setTimeout(poll, 80);
+    };
+
+    window.addEventListener('pywebviewready', handleReady, { once: true });
+    poll();
+  });
 }
 
 function isEnvelope(response) {
@@ -209,6 +248,11 @@ function statValue(statValue) {
   return '-';
 }
 
+function statUpgradeCount(statValue) {
+  if (!statValue || typeof statValue !== 'object') return 0;
+  return Number(statValue.upgrade ?? 0) || 0;
+}
+
 function subStatsOf(disk) {
   return Array.isArray(disk?.sub_stats) ? disk.sub_stats : [];
 }
@@ -251,6 +295,10 @@ function resetFilters() {
 
 function changePage(delta) {
   currentPage.value = Math.min(totalPages.value, Math.max(1, displayPage.value + delta));
+}
+
+function changeHistoryPage(delta) {
+  historyPage.value = Math.min(historyTotalPages.value, Math.max(1, historyDisplayPage.value + delta));
 }
 
 function setIconFor(disk) {
@@ -418,6 +466,7 @@ async function refreshHistory() {
   try {
     const result = await callApi('get_scan_history');
     history.value = Array.isArray(result) ? result : result?.history || [];
+    historyPage.value = Math.min(historyPage.value, Math.max(1, Math.ceil(history.value.length / historyPageSize)));
   } catch (error) {
     lastError.value = errorMessageOf(error);
     addLog(`读取扫描历史失败：${lastError.value}`);
@@ -501,6 +550,7 @@ onMounted(async () => {
   window.addEventListener('maa-progress', handleProgress);
   window.addEventListener('maa-complete', handleComplete);
   window.addEventListener('maa-error', handleError);
+  await waitForApi();
   await Promise.all([refreshCurrentDisks(), refreshHistory(), refreshMetadata(), refreshCharacterBuilds()]);
   addLog(getApi() ? '后端已连接。' : '后端未连接，页面使用演示数据。');
 });
@@ -682,6 +732,7 @@ onBeforeUnmount(() => {
                   class="rounded-sm border-2 border-zinc-800 bg-zinc-900 px-2 py-1 font-mono text-[11px] font-black text-zinc-300"
                 >
                   {{ statName(sub) }} {{ statValue(sub) }}
+                  <span class="text-[#f6ce00]">· +{{ statUpgradeCount(sub) }}</span>
                 </span>
               </div>
               <p v-else class="font-mono text-xs font-bold text-zinc-600">暂无副词条</p>
@@ -701,10 +752,23 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="panel">
-        <div class="panel-title">扫描历史</div>
+        <div class="panel-title flex items-center justify-between gap-3">
+          <span>扫描历史</span>
+          <span class="text-zinc-400">{{ history.length }} 条</span>
+        </div>
+        <div
+          v-if="history.length"
+          class="flex flex-wrap items-center justify-between gap-3 border-b-4 border-zinc-800 p-4 font-mono text-xs font-black"
+        >
+          <span class="text-zinc-400">第 {{ historyDisplayPage }} / {{ historyTotalPages }} 页，每页 {{ historyPageSize }} 条</span>
+          <div class="flex gap-2">
+            <button class="hard-button py-1" type="button" :disabled="historyDisplayPage <= 1" @click="changeHistoryPage(-1)">上一页</button>
+            <button class="hard-button py-1" type="button" :disabled="historyDisplayPage >= historyTotalPages" @click="changeHistoryPage(1)">下一页</button>
+          </div>
+        </div>
         <div class="divide-y-2 divide-zinc-800">
           <div
-            v-for="item in history"
+            v-for="item in pagedHistory"
             :key="scanIdOf(item)"
             class="grid gap-3 p-4 md:grid-cols-[minmax(0,1fr)_auto]"
           >
