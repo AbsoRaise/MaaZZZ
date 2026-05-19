@@ -62,6 +62,26 @@ def test_run_scan_uses_maaframework_runtime_when_enabled(temp_dir):
     assert logs[-1] == "MaaFramework 任务执行完成"
 
 
+def test_run_scan_does_not_fall_back_when_maa_connection_fails(temp_dir):
+    events = []
+    runtime = FailingConnectRuntime()
+    scanner = MaaScanner(
+        resource_root=temp_dir / "resources",
+        debug_dir=temp_dir / "debug",
+        maa_runtime=runtime,
+    )
+    profile = scanner.profile | {"maa": {"enabled": True, "controller": "win32"}}
+    scanner.profile_path.write_text(json.dumps(profile, ensure_ascii=False), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="未找到匹配的绝区零窗口"):
+        scanner.run_scan(events.append)
+
+    assert runtime.calls == [("connect", scanner.profile)]
+    debug_result = json.loads((temp_dir / "debug" / "latest_result.json").read_text(encoding="utf-8"))
+    assert "未找到匹配的绝区零窗口" in debug_result["error"]
+    assert "disks" not in debug_result
+
+
 def test_run_scan_falls_back_when_maaframework_disabled(temp_dir):
     runtime = FakeMaaRuntime()
     scanner = MaaScanner(resource_root=temp_dir / "resources", maa_runtime=runtime)
@@ -135,6 +155,29 @@ def test_parse_detail_ocr_results_extracts_disk_detail():
         {"name": "攻击力", "value": "6%", "upgrade": 1},
         {"name": "暴击率", "value": "2.4%"},
     ]
+
+
+def test_parse_detail_ocr_results_ignores_non_stat_detail_text():
+    disk = parse_detail_ocr_results(
+        [
+            {"text": "极地重金属[4]", "box": [944, 181, 102, 21], "score": 0.97},
+            {"text": "主属性", "box": [952, 303, 41, 18], "score": 0.98},
+            {"text": "暴击率", "box": [951, 327, 46, 22], "score": 0.99},
+            {"text": "24%", "box": [1169, 327, 43, 22], "score": 0.99},
+            {"text": "副属性", "box": [952, 355, 41, 19], "score": 0.99},
+            {"text": "暴击伤害", "box": [951, 380, 67, 21], "score": 0.99},
+            {"text": "9.6%", "box": [1187, 380, 42, 22], "score": 0.99},
+            {"text": "套装效果", "box": [951, 415, 67, 21], "score": 0.99},
+            {"text": "二件套：冰属性伤害提升", "box": [951, 445, 190, 21], "score": 0.96},
+            {"text": "查看效果", "box": [955, 516, 47, 11], "score": 0.5},
+            {"text": "等级15/15", "box": [979, 269, 84, 21], "score": 0.99},
+        ],
+        {"page": 1, "row": 1, "column": 1, "index": 1},
+    )
+
+    assert disk is not None
+    assert disk["main_stat"] == {"name": "暴击率", "value": "24%"}
+    assert disk["sub_stats"] == [{"name": "暴击伤害", "value": "9.6%"}]
 
 
 def test_iter_grid_scan_targets_accounts_for_bottom_row_auto_scroll():
@@ -378,6 +421,19 @@ class FakeMaaRuntime:
     def connect(self, profile):
         self.calls.append(("connect", profile))
         return {"connected": True, "mode": "maa", "message": "connected"}
+
+    def run_task(self, entry, profile):
+        self.calls.append(("run_task", entry, profile))
+        return {"completed": True}
+
+
+class FailingConnectRuntime:
+    def __init__(self):
+        self.calls = []
+
+    def connect(self, profile):
+        self.calls.append(("connect", profile))
+        raise RuntimeError("未找到匹配的绝区零窗口；请先启动游戏，或在 scan_profile.json 的 maa.hwnd 中填写窗口句柄")
 
     def run_task(self, entry, profile):
         self.calls.append(("run_task", entry, profile))

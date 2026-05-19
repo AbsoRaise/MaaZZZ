@@ -1,9 +1,9 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { diskIconFor } from '../diskIcons';
 
 const DISK_PLACEHOLDER_ASSET = '';
 const STAT_ICON_ASSETS = {};
-const SET_ICON_ASSETS = {};
 const DEFAULT_METADATA = {
   main_stats: [
     '生命值',
@@ -126,13 +126,21 @@ const metadata = ref(DEFAULT_METADATA);
 const currentDisks = ref([]);
 const selectedCharacter = ref('');
 const draft = ref(createEmptyDraft());
-const overrideConfig = ref(createOverrideConfig());
 const advisorOptions = ref({
   min_effective_sub_stats: 1,
   high_weight_threshold: 0.8,
 });
 const optimizeResult = ref(null);
 const promisingResults = ref([]);
+const hasRunOptimize = ref(false);
+const hasRunPromising = ref(false);
+const collapsed = ref({
+  weights: false,
+  target: false,
+  actions: false,
+  result: false,
+  promising: false,
+});
 
 const characterNames = computed(() => Object.keys(builds.value));
 const selectedBuild = computed(() => builds.value[selectedCharacter.value] || null);
@@ -166,6 +174,8 @@ watch(selectedCharacter, (name) => {
   loadDraftFromBuild(builds.value[name]);
   optimizeResult.value = null;
   promisingResults.value = [];
+  hasRunOptimize.value = false;
+  hasRunPromising.value = false;
 });
 
 function createEmptyDraft() {
@@ -180,18 +190,6 @@ function createEmptyDraft() {
       target_set_4: '',
       target_set_2: '',
       alternatives: [],
-    },
-  };
-}
-
-function createOverrideConfig() {
-  return {
-    target_set_4: '',
-    target_set_2: '',
-    preferred_main_stats: {
-      4: [],
-      5: [],
-      6: [],
     },
   };
 }
@@ -304,6 +302,10 @@ async function loadInitialData() {
     currentDisks.value = normalizeDisks(diskPayload);
     selectedCharacter.value = characterNames.value[0] || '';
     loadDraftFromBuild(selectedBuild.value);
+    optimizeResult.value = null;
+    promisingResults.value = [];
+    hasRunOptimize.value = false;
+    hasRunPromising.value = false;
     infoText.value = apiReady.value ? '后端数据已加载。' : '后端未连接，当前使用演示数据。';
     metadata.value = { ...DEFAULT_METADATA, ...(await callApi('get_disk_metadata')) };
   } catch (error) {
@@ -374,7 +376,6 @@ function loadDraftFromBuild(build) {
       alternatives: normalized.preferred_sets.alternatives,
     },
   };
-  overrideConfig.value = createOverrideConfig();
 }
 
 function draftToConfig() {
@@ -396,17 +397,7 @@ function draftToConfig() {
 }
 
 function buildRunConfig() {
-  const base = draftToConfig();
-  const preferredMainStats = normalizePreferredMainStats(overrideConfig.value.preferred_main_stats);
-  return {
-    weights: base.weights,
-    preferred_sets: {
-      target_set_4: overrideConfig.value.target_set_4.trim() || base.preferred_sets.target_set_4,
-      target_set_2: overrideConfig.value.target_set_2.trim() || base.preferred_sets.target_set_2,
-      alternatives: Array.isArray(base.preferred_sets.alternatives) ? base.preferred_sets.alternatives : [],
-    },
-    preferred_main_stats: Object.keys(preferredMainStats).length ? preferredMainStats : base.preferred_main_stats,
-  };
+  return draftToConfig();
 }
 
 async function saveBuild() {
@@ -433,8 +424,11 @@ async function runOptimize() {
   isOptimizing.value = true;
   errorText.value = '';
   optimizeResult.value = null;
+  hasRunOptimize.value = false;
   try {
     optimizeResult.value = await callApi('get_optimize_combo', selectedCharacter.value, buildRunConfig());
+    hasRunOptimize.value = true;
+    collapsed.value.result = false;
   } catch (error) {
     errorText.value = errorMessageOf(error);
   } finally {
@@ -447,6 +441,7 @@ async function runPromising() {
   isFindingPromising.value = true;
   errorText.value = '';
   promisingResults.value = [];
+  hasRunPromising.value = false;
   try {
     promisingResults.value = normalizeRecommendations(
       await callApi('get_promising_disks', selectedCharacter.value, {
@@ -454,6 +449,8 @@ async function runPromising() {
         config: buildRunConfig(),
       }),
     );
+    hasRunPromising.value = true;
+    collapsed.value.promising = false;
   } catch (error) {
     errorText.value = errorMessageOf(error);
   } finally {
@@ -465,7 +462,7 @@ async function locateDisk(disk) {
   try {
     const result = await callApi('locate_disk', disk);
     const target = result?.target || {};
-    infoText.value = `${result?.message || '定位预览已生成'}：P${target.page ?? '-'} / R${target.row ?? '-'} / C${target.column ?? '-'}`;
+    infoText.value = `${result?.message || '定位预览已生成'}：${warehouseLabel({ inventory_pos: target })}`;
   } catch (error) {
     errorText.value = errorMessageOf(error);
   }
@@ -481,9 +478,10 @@ function normalizeRecommendations(payload) {
 function buildMockOptimizeResult(characterName, config) {
   const selected = [1, 2, 3, 4, 5, 6].map((slot) => mockDisks.find((item) => item.slot === slot)).filter(Boolean);
   const weights = normalizeWeights(config?.weights || selectedBuild.value?.weights);
+  const preferredMainStats = normalizePreferredMainStats(config?.preferred_main_stats || selectedBuild.value?.preferred_main_stats);
   const scoreBreakdown = selected.map((item) => ({
     disk: item,
-    score: scoreDisk(item, weights),
+    score: scoreDisk(item, weights, preferredMainStats),
   }));
   const setCounts = selected.reduce((acc, item) => {
     acc[item.set_name] = (acc[item.set_name] || 0) + 1;
@@ -505,27 +503,79 @@ function buildMockOptimizeResult(characterName, config) {
 }
 
 function buildMockPromisingResults() {
+  const weights = normalizeWeights(selectedBuild.value?.weights);
+  const preferredMainStats = normalizePreferredMainStats(selectedBuild.value?.preferred_main_stats);
   return mockDisks
     .filter((item) => Number(item.level || 0) < 15)
     .slice(0, 5)
-    .map((item, index) => ({
-      disk: item,
-      rank: index < 2 ? 'high' : 'medium',
-      potential_score: round(32 - index * 3.8),
-      current_score: round(10 + index * 1.7),
-      reasons: [
-        '未满级驱动盘',
-        '包含角色有效副词条',
-        `仓库位置：${warehouseLabel(item)}`,
-      ],
-    }));
+    .map((item) => {
+      const currentScore = scoreDisk(item, weights, preferredMainStats);
+      const effectiveCount = (item.sub_stats || []).filter((sub) => (weights[statName(sub)] || 0) > 0).length;
+      const highCount = (item.sub_stats || []).filter((sub) => (weights[statName(sub)] || 0) >= Number(advisorOptions.value.high_weight_threshold || 0)).length;
+      const potentialScore = round(Math.min(55, currentScore + effectiveCount * 2 + highCount * 4));
+      return {
+        disk: item,
+        rank: potentialScore >= 25 ? 'high' : potentialScore >= 12 ? 'medium' : 'low',
+        potential_score: potentialScore,
+        current_score: currentScore,
+        reasons: [
+          '未满级驱动盘',
+          `包含 ${effectiveCount} 条角色有效副词条`,
+          `包含 ${highCount} 条高价值副词条`,
+          `仓库位置：${warehouseLabel(item)}`,
+        ],
+      };
+    });
 }
 
-function scoreDisk(item, weights) {
-  const main = statName(item.main_stat);
-  const mainScore = (Number(item.main_stat?.value) || 0) * (weights[main] || 0) * 2;
-  const subScore = (item.sub_stats || []).reduce((sum, sub) => sum + (Number(sub.value) || 0) * (weights[statName(sub)] || 0), 0);
-  return round(mainScore + subScore);
+function scoreDisk(item, weights, preferredMainStats = {}) {
+  const slot = Number(item?.slot || 0);
+  const maxWeight = slotMaxWeight(slot, weights, preferredMainStats);
+  if (!maxWeight) return 0;
+  const subWeight = (item.sub_stats || []).reduce((sum, sub) => sum + subStatCount(sub) * (weights[statName(sub)] || 0), 0);
+  const mainName = statName(item?.main_stat);
+  const wantedMainStats = preferredMainStats?.[slot] || [];
+  const mainUseful = !wantedMainStats.length || wantedMainStats.includes(mainName);
+  const mainWeight = slot >= 4 && slot <= 6 && mainUseful
+    ? 3 * (weights[mainName] || 0) * mainLevelMultiplier(item)
+    : 0;
+  return round(Math.min(55, (subWeight + mainWeight) * (55 / maxWeight)) * rarityMultiplier(item));
+}
+
+function slotMaxWeight(slot, weights, preferredMainStats) {
+  const positive = Object.entries(weights || {}).filter(([, weight]) => Number(weight) > 0);
+  if (!positive.length) return 0;
+  if (slot < 4 || slot > 6) return maxSubWeight(positive.map(([, weight]) => Number(weight)));
+  const preferred = (preferredMainStats?.[slot] || []).filter((stat) => Number(weights[stat] || 0) > 0);
+  if (!preferred.length) return maxSubWeight(positive.map(([, weight]) => Number(weight)));
+  return Math.max(
+    ...preferred.map((mainStat) => {
+      const subWeights = positive.filter(([stat]) => stat !== mainStat).map(([, weight]) => Number(weight));
+      return maxSubWeight(subWeights) + 3 * Number(weights[mainStat] || 0);
+    }),
+  );
+}
+
+function maxSubWeight(weights) {
+  const sorted = weights.filter((weight) => weight > 0).sort((a, b) => b - a).slice(0, 4);
+  if (!sorted.length) return 0;
+  return sorted[0] * (9 - sorted.length + 1) + sorted.slice(1).reduce((sum, weight) => sum + weight, 0);
+}
+
+function subStatCount(sub) {
+  return Math.max(1, 1 + (Number(sub?.upgrade ?? sub?.upgrade_count ?? 0) || 0));
+}
+
+function mainLevelMultiplier(item) {
+  const level = Math.max(0, Number(item?.level || 0));
+  return Math.max(0.25, Math.min(1, 0.25 + level * 0.05));
+}
+
+function rarityMultiplier(item) {
+  const rarity = String(item?.rarity || 'S').toUpperCase();
+  if (rarity === 'A') return 0.67;
+  if (rarity === 'B') return 0.33;
+  return 1;
 }
 
 function round(value) {
@@ -576,28 +626,100 @@ function diskId(item, index) {
   return item?.id || item?.disk_id || `${item?.slot || 'disk'}-${index}`;
 }
 
+function comboItems(result) {
+  const combo = Array.isArray(result?.combo) ? result.combo : [];
+  return [0, 1, 2, 3, 4, 5].map((index) => combo[index] || null);
+}
+
+function comboScore(result, index) {
+  const breakdown = Array.isArray(result?.score_breakdown) ? result.score_breakdown : [];
+  return breakdown[index]?.score ?? 0;
+}
+
+function comboSlotLabel(item, index) {
+  return `${item?.slot || index + 1} 号位`;
+}
+
+function isEmptyComboSlot(item) {
+  return !item || typeof item !== 'object';
+}
+
+function toggleSection(name) {
+  collapsed.value[name] = !collapsed.value[name];
+}
+
+function collapseLabel(name) {
+  return collapsed.value[name] ? '展开' : '收起';
+}
+
+function matchTypeLabel(type) {
+  const labels = {
+    exact_4_2: '命中目标 4+2',
+    target_4_any_2: '命中四件套，二件套降级',
+    any_4_2: '任意 4+2 套装',
+    two_two_two: '三组二件套',
+    best_score_only: '仅按分数最优',
+  };
+  return labels[type] || '未知匹配';
+}
+
+function selectedMainStatsSummary() {
+  return [4, 5, 6]
+    .map((slot) => {
+      const stats = draft.value.preferred_main_stats?.[slot] || [];
+      return `${slot}号位：${stats.length ? stats.join(' / ') : '未指定'}`;
+    })
+    .join('；');
+}
+
+function weightSummary() {
+  const items = draft.value.weights
+    .map((item) => ({ name: String(item.name || '').trim(), value: Number(item.value) || 0 }))
+    .filter((item) => item.name);
+  if (!items.length) return '未指定';
+  return items.map((item) => `${item.name} × ${item.value}`).join('；');
+}
+
 function warehouseLabel(item) {
   const raw = item?.warehouse_location || item?.location || item?.position || item?.source || item?.inventory_pos;
-  if (!raw) return '未知';
-  if (typeof raw === 'string') return raw;
-  const page = raw.page ?? raw.p ?? raw[0] ?? '-';
+  if (!raw) return '第 - 行 / 第 - 列';
+  if (typeof raw === 'string') {
+    const match = raw.match(/R\s*(\d+).*C\s*(\d+)/i) || raw.match(/第\s*(\d+)\s*行.*第\s*(\d+)\s*[列个]/);
+    return match ? `第 ${match[1]} 行 / 第 ${match[2]} 列` : raw;
+  }
   const row = raw.row ?? raw.r ?? raw[1] ?? '-';
-  const col = raw.col ?? raw.c ?? raw[2] ?? '-';
-  return `P${page} / R${row} / C${col}`;
+  const col = raw.column ?? raw.col ?? raw.c ?? raw[2] ?? '-';
+  return `第 ${row} 行 / 第 ${col} 列`;
+}
+
+function formatReason(reason) {
+  const text = String(reason || '');
+  const locationMatch = text.match(/^仓库位置[:：]\s*(.+)$/);
+  if (!locationMatch) return text;
+  return `仓库位置：${warehouseLabel({ warehouse_location: locationMatch[1] })}`;
+}
+
+function scoreLabel(item) {
+  return `潜力 ${item?.potential_score ?? '-'} / 当前 ${item?.current_score ?? '-'}`;
+}
+
+function scoreTitle() {
+  return '潜力分表示按当前配置估算的培养后收益；当前分表示这块驱动盘现在按属性权重计算出的得分。';
 }
 
 function diskStyle(item) {
-  const asset = item?.asset || item?.image || item?.icon || SET_ICON_ASSETS[item?.set_name] || DISK_PLACEHOLDER_ASSET;
+  const asset = item?.asset || item?.image || item?.icon || diskIconFor(item?.set_name) || DISK_PLACEHOLDER_ASSET;
+  const fallbackBackground =
+    'radial-gradient(circle at 50% 50%, #f6ce00 0 6%, #09090b 7% 13%, #d4d4d8 14% 15%, #18181b 16% 32%, #71717a 33% 34%, #09090b 35% 52%, #3f3f46 53% 55%, #18181b 56% 100%)';
   if (asset) {
     return {
-      backgroundImage: `url("${asset}")`,
+      backgroundImage: `url("${asset}"), ${fallbackBackground}`,
       backgroundPosition: 'center',
       backgroundSize: 'cover',
     };
   }
   return {
-    background:
-      'radial-gradient(circle at 50% 50%, #f6ce00 0 6%, #09090b 7% 13%, #d4d4d8 14% 15%, #18181b 16% 32%, #71717a 33% 34%, #09090b 35% 52%, #3f3f46 53% 55%, #18181b 56% 100%)',
+    background: fallbackBackground,
   };
 }
 
@@ -659,24 +781,6 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-title">盘池概况</div>
-        <div class="space-y-3 p-4">
-          <div class="grid grid-cols-6 gap-2">
-            <div v-for="(count, slot) in diskSummary.slots" :key="slot" class="slot-box">
-              <span>{{ slot }}</span>
-              <strong>{{ count }}</strong>
-            </div>
-          </div>
-          <div class="max-h-64 space-y-2 overflow-auto">
-            <div v-for="(count, name) in diskSummary.sets" :key="name" class="flex min-w-0 items-center justify-between gap-3 rounded-sm border-2 border-zinc-800 bg-zinc-950 px-3 py-2 font-mono text-xs font-black">
-              <span class="truncate">{{ name }}</span>
-              <span class="text-[#f6ce00]">{{ count }}</span>
-            </div>
-            <p v-if="!currentDisks.length" class="font-mono text-xs font-bold text-zinc-500">暂无当前盘池数据。</p>
-          </div>
-        </div>
-      </div>
     </aside>
 
     <div class="space-y-5">
@@ -684,9 +788,12 @@ onMounted(async () => {
         <div class="panel">
           <div class="panel-title flex items-center justify-between gap-3">
             <span>属性权重</span>
-            <button class="hard-button py-1" type="button" @click="addWeight">新增</button>
+            <div class="flex shrink-0 gap-2">
+              <button class="hard-button py-1" type="button" @click="addWeight">新增</button>
+              <button class="hard-button py-1" type="button" @click="toggleSection('weights')">{{ collapseLabel('weights') }}</button>
+            </div>
           </div>
-          <div class="space-y-3 p-4">
+          <div v-if="!collapsed.weights" class="space-y-3 p-4">
             <div v-for="(item, index) in draft.weights" :key="index" class="grid grid-cols-[minmax(0,1fr)_92px_auto] gap-2">
               <input v-model="item.name" class="hard-input min-w-0" type="text" placeholder="属性名" />
               <input v-model.number="item.value" class="hard-input" type="number" step="0.05" />
@@ -696,8 +803,11 @@ onMounted(async () => {
         </div>
 
         <div class="panel">
-          <div class="panel-title">推荐目标</div>
-          <div class="space-y-4 p-4">
+          <div class="panel-title flex items-center justify-between gap-3">
+            <span>推荐目标</span>
+            <button class="hard-button py-1" type="button" @click="toggleSection('target')">{{ collapseLabel('target') }}</button>
+          </div>
+          <div v-if="!collapsed.target" class="space-y-4 p-4">
             <div class="grid gap-3 sm:grid-cols-3">
               <label v-for="slot in [4, 5, 6]" :key="slot" class="block">
                 <span class="field-label">{{ slot }} 号位主属性</span>
@@ -733,34 +843,17 @@ onMounted(async () => {
       </div>
 
       <div class="panel">
-        <div class="panel-title">运行配置</div>
-        <div class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-          <div class="grid gap-4 md:grid-cols-2">
-            <label class="block md:col-span-1">
-              <span class="field-label">临时四件套</span>
-              <input v-model="overrideConfig.target_set_4" class="hard-input mt-2 w-full" list="set-options" type="text" placeholder="留空沿用" />
-            </label>
-            <label class="block md:col-span-1">
-              <span class="field-label">临时二件套</span>
-              <input v-model="overrideConfig.target_set_2" class="hard-input mt-2 w-full" list="set-options" type="text" placeholder="留空沿用" />
-            </label>
-            <div class="md:col-span-2 grid gap-3 lg:grid-cols-3">
-              <label v-for="slot in [4, 5, 6]" :key="slot" class="block">
-                <span class="field-label">临时 {{ slot }} 号位主属性</span>
-                <div class="mt-2 max-h-36 overflow-auto rounded-sm border-2 border-zinc-800 bg-zinc-950 p-2">
-                  <button
-                    v-for="stat in mainStatOptions"
-                    :key="`override-${slot}-${stat}`"
-                    class="stat-choice"
-                    :class="{ 'stat-choice-active': isMainStatSelected(overrideConfig, slot, stat) }"
-                    type="button"
-                    @click="toggleMainStat(overrideConfig, slot, stat)"
-                  >
-                    {{ stat }}
-                  </button>
-                </div>
-              </label>
-            </div>
+        <div class="panel-title flex items-center justify-between gap-3">
+          <span>执行操作</span>
+          <button class="hard-button py-1" type="button" @click="toggleSection('actions')">{{ collapseLabel('actions') }}</button>
+        </div>
+        <div v-if="!collapsed.actions" class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <div class="rounded-sm border-2 border-zinc-800 bg-zinc-950 p-3 font-mono text-xs font-bold text-zinc-300">
+            <p class="text-[#f6ce00]">当前使用上方推荐目标进行计算。</p>
+            <p class="mt-2">四件套：{{ draft.preferred_sets.target_set_4 || '未指定' }}</p>
+            <p class="mt-1">二件套：{{ draft.preferred_sets.target_set_2 || '未指定' }}</p>
+            <p class="mt-1">主属性：{{ selectedMainStatsSummary() }}</p>
+            <p class="mt-1">副属性权重：{{ weightSummary() }}</p>
           </div>
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <button class="hard-button hard-button-active w-full" type="button" :disabled="!canRun || isOptimizing" @click="runOptimize">
@@ -773,65 +866,42 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div class="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
-        <div class="panel">
+      <div v-if="hasRunOptimize || hasRunPromising" class="space-y-5">
+        <div v-if="hasRunOptimize" class="panel">
           <div class="panel-title flex items-center justify-between gap-3">
             <span>最优组合结果</span>
-            <span v-if="optimizeResult" class="text-zinc-300">总分 {{ optimizeResult.total_score ?? '-' }}</span>
+            <div class="flex shrink-0 items-center gap-3">
+              <span v-if="optimizeResult" class="text-zinc-300">总分 {{ optimizeResult.total_score ?? '-' }}</span>
+              <button class="hard-button py-1" type="button" @click="toggleSection('result')">{{ collapseLabel('result') }}</button>
+            </div>
           </div>
-          <div v-if="optimizeResult" class="space-y-4 p-4">
-            <div class="grid gap-3 md:grid-cols-4">
+          <div v-if="optimizeResult && !collapsed.result" class="space-y-4 p-4">
+            <div class="grid gap-3 md:grid-cols-2">
               <div class="metric-box">
                 <span>匹配类型</span>
-                <strong class="text-base">{{ optimizeResult.match_type || '-' }}</strong>
-              </div>
-              <div class="metric-box">
-                <span>降级</span>
-                <strong class="text-base">{{ optimizeResult.is_fallback ? '是' : '否' }}</strong>
+                <strong class="text-base">{{ matchTypeLabel(optimizeResult.match_type) }}</strong>
               </div>
               <div class="metric-box">
                 <span>总分</span>
                 <strong>{{ optimizeResult.total_score ?? '-' }}</strong>
               </div>
-              <div class="metric-box">
-                <span>警告</span>
-                <strong>{{ optimizeResult.warnings?.length || 0 }}</strong>
-              </div>
-            </div>
-
-            <div v-if="optimizeResult.warnings?.length" class="space-y-2">
-              <p v-for="warning in optimizeResult.warnings" :key="warning" class="notice-box border-amber-400 text-amber-200">{{ warning }}</p>
-            </div>
-
-            <div class="grid gap-3 md:grid-cols-2">
-              <div class="rounded-sm border-2 border-zinc-800 bg-zinc-950 p-3">
-                <p class="field-label">套装计数</p>
-                <div class="mt-3 space-y-2">
-                  <div v-for="(count, setName) in optimizeResult.set_counts" :key="setName" class="flex justify-between gap-3 font-mono text-xs font-black">
-                    <span class="truncate text-zinc-300">{{ setName }}</span>
-                    <span class="text-[#f6ce00]">{{ count }}</span>
-                  </div>
-                </div>
-              </div>
-              <div class="rounded-sm border-2 border-zinc-800 bg-zinc-950 p-3">
-                <p class="field-label">得分拆解</p>
-                <div class="mt-3 space-y-2">
-                  <div v-for="(item, index) in optimizeResult.score_breakdown || []" :key="diskId(item.disk, index)" class="flex justify-between gap-3 font-mono text-xs font-black">
-                    <span class="truncate text-zinc-300">{{ item.disk?.slot }}号位 {{ item.disk?.set_name }}</span>
-                    <span class="text-[#f6ce00]">{{ item.score }}</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div class="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-              <article v-for="(item, index) in optimizeResult.combo || []" :key="diskId(item, index)" class="disk-card">
+              <article v-for="(item, index) in comboItems(optimizeResult)" :key="diskId(item, index)" class="disk-card" :class="{ 'opacity-70': isEmptyComboSlot(item) }">
+                <div v-if="isEmptyComboSlot(item)" class="flex min-h-[180px] flex-col items-center justify-center rounded-sm border-2 border-dashed border-zinc-700 bg-zinc-950 p-4 text-center">
+                  <p class="font-mono text-xs font-black text-[#f6ce00]">{{ comboSlotLabel(item, index) }}</p>
+                  <h3 class="mt-2 text-base font-black text-zinc-300">留空</h3>
+                  <p class="mt-2 max-w-[220px] font-mono text-xs font-bold text-zinc-500">该位置暂无可用驱动盘，不参与总分和套装统计。</p>
+                </div>
+                <template v-else>
                 <div class="flex gap-3">
                   <div class="disk-vinyl" :style="diskStyle(item)"></div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate font-mono text-xs font-black text-[#f6ce00]">{{ item.slot }} 号位</p>
+                    <p class="truncate font-mono text-xs font-black text-[#f6ce00]">{{ comboSlotLabel(item, index) }}</p>
                     <h3 class="truncate text-sm font-black">{{ item.set_name || '未知套装' }}</h3>
                     <p class="mt-1 truncate font-mono text-xs text-zinc-400">主词条：{{ statName(item.main_stat) }} {{ statValue(item.main_stat) }}</p>
+                    <p class="mt-1 font-mono text-xs font-black text-[#f6ce00]">得分：{{ comboScore(optimizeResult, index) }}</p>
                     <p class="mt-2 font-mono text-[11px] font-bold text-zinc-500">{{ warehouseLabel(item) }}</p>
                   </div>
                 </div>
@@ -851,15 +921,18 @@ onMounted(async () => {
                 <button class="mt-3 hard-button w-full py-2" type="button" @click="locateDisk(item)">
                   定位到游戏中（预留）
                 </button>
+                </template>
               </article>
             </div>
           </div>
-          <div v-else class="empty-state">尚未运行最优组合。</div>
         </div>
 
-        <div class="panel">
-          <div class="panel-title">培养推荐</div>
-          <div class="space-y-4 p-4">
+        <div v-if="hasRunPromising" class="panel">
+          <div class="panel-title flex items-center justify-between gap-3">
+            <span>培养推荐</span>
+            <button class="hard-button py-1" type="button" @click="toggleSection('promising')">{{ collapseLabel('promising') }}</button>
+          </div>
+          <div v-if="!collapsed.promising" class="space-y-4 p-4">
             <div class="grid grid-cols-2 gap-3">
               <label class="block">
                 <span class="field-label">有效副词条下限</span>
@@ -878,11 +951,12 @@ onMounted(async () => {
                     <p class="font-mono text-xs font-black text-[#f6ce00]">{{ rankLabel(item.rank) }}</p>
                     <h3 class="truncate text-sm font-black">{{ item.disk?.slot }}号位 {{ item.disk?.set_name || '未知套装' }}</h3>
                   </div>
-                  <div class="shrink-0 text-right font-mono text-xs font-black">
-                    <p class="text-[#f6ce00]">{{ item.potential_score }}</p>
+                  <div class="shrink-0 text-right font-mono text-xs font-black" :title="scoreTitle()">
+                    <p class="text-[#f6ce00]">潜力 {{ item.potential_score }}</p>
                     <p class="text-zinc-500">当前 {{ item.current_score }}</p>
                   </div>
                 </div>
+                <p class="mt-2 font-mono text-[11px] font-bold text-zinc-500" :title="scoreTitle()">{{ scoreLabel(item) }}</p>
                 <div class="mt-3 flex gap-3">
                   <div class="disk-vinyl h-14 w-14" :style="diskStyle(item.disk)"></div>
                   <div class="min-w-0 flex-1 font-mono text-xs font-bold text-zinc-300">
@@ -900,7 +974,7 @@ onMounted(async () => {
                   </span>
                 </div>
                 <div class="mt-3 flex flex-wrap gap-2">
-                  <span v-for="reason in item.reasons || []" :key="reason" class="reason-chip">{{ reason }}</span>
+                  <span v-for="reason in item.reasons || []" :key="reason" class="reason-chip">{{ formatReason(reason) }}</span>
                 </div>
                 <button class="mt-3 hard-button w-full py-2" type="button" @click="locateDisk(item.disk)">
                   定位到游戏中（预留）

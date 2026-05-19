@@ -104,7 +104,7 @@ def test_slots_four_five_six_mark_main_stat_matches_and_explain_bonus():
         slot = result["disk"]["slot"]
         main_stat_name = result["disk"]["main_stat"]["name"]
         assert f"{slot} 号位主属性匹配：{main_stat_name}" in result["reasons"]
-        assert any("主属性匹配加分" in reason for reason in result["reasons"])
+        assert not any("主属性匹配加分" in reason for reason in result["reasons"])
 
 
 def test_good_sub_stats_with_unmatched_main_stat_are_kept_at_lower_priority_with_reason():
@@ -269,6 +269,7 @@ def test_current_score_uses_disk_optimizer_score_disk_formula():
     expected = DiskOptimizer(advisor().character_builds).score_disk(
         candidate,
         advisor().character_builds["Anby"]["weights"],
+        {4: ["crit"], 5: ["atk"], 6: ["atk"]},
     )
 
     assert result["current_score"] == expected

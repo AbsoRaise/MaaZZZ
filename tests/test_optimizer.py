@@ -3,11 +3,13 @@ import pytest
 from backend.service.optimizer import DiskOptimizer
 
 
-def disk(disk_id, slot, set_name, main_stat_name, main_value, sub_stats=None):
+def disk(disk_id, slot, set_name, main_stat_name, main_value, sub_stats=None, level=15, rarity="S"):
     return {
         "id": disk_id,
         "slot": slot,
         "set_name": set_name,
+        "level": level,
+        "rarity": rarity,
         "main_stat": {"name": main_stat_name, "value": main_value},
         "sub_stats": sub_stats or [],
     }
@@ -88,11 +90,14 @@ def test_main_stat_filter_falls_back_per_slot_when_no_matching_main_stat():
     assert any("slot 5" in warning for warning in result["warnings"])
 
 
-def test_empty_slot_candidates_raise_value_error():
+def test_empty_slot_candidates_are_left_blank():
     disks = [item for item in base_disks() if item["slot"] != 3]
 
-    with pytest.raises(ValueError, match="slot 3"):
-        optimizer().find_best_combination("Anby", {}, disks)
+    result = optimizer().find_best_combination("Anby", {}, disks)
+
+    assert result["combo"][2] is None
+    assert result["score_breakdown"][2] == {"disk": None, "score": 0}
+    assert any("slot 3" in warning and "leaving empty" in warning for warning in result["warnings"])
 
 
 def test_default_config_uses_character_preferred_sets_and_main_stats():
@@ -110,13 +115,54 @@ def test_score_disk_weights_main_stat_double_and_adds_sub_stats():
             4,
             "Thunder",
             "crit",
-            3,
-            [{"name": "atk", "value": 5}, {"name": "hp", "value": 10}],
+            0,
+            [{"name": "atk", "value": 5, "upgrade": 1}, {"name": "hp", "value": 10}],
+            level=15,
         ),
         {"crit": 2.0, "atk": 1.5, "hp": 0.25},
+        {4: ["crit"]},
     )
 
-    assert score == 22.0
+    assert score == 23.3908
+
+
+def test_score_disk_balances_each_slot_to_55_points():
+    build = {
+        "weights": {"crit": 1.0, "crit_dmg": 1.0, "atk_pct": 0.75, "atk": 0.25, "pen": 0.25},
+        "preferred_main_stats": {"4": ["crit", "crit_dmg"], "5": ["atk_pct"], "6": ["atk_pct"]},
+    }
+    opt = optimizer(build)
+
+    slot2 = disk(
+        "slot2",
+        2,
+        "Thunder",
+        "atk",
+        0,
+        [
+            {"name": "crit_dmg", "value": "14.4%", "upgrade": 2},
+            {"name": "pen", "value": 9, "upgrade": 2},
+            {"name": "crit", "value": "4.8%", "upgrade": 1},
+            {"name": "def", "value": 15},
+        ],
+    )
+    slot4 = disk(
+        "slot4",
+        4,
+        "Thunder",
+        "crit_dmg",
+        0,
+        [
+            {"name": "atk_pct", "value": "3%", "upgrade": 0},
+            {"name": "crit", "value": "7.2%", "upgrade": 2},
+            {"name": "hp", "value": 112, "upgrade": 0},
+        ],
+        level=12,
+        rarity="A",
+    )
+
+    assert opt.score_disk(slot2, build["weights"]) == 39.5312
+    assert opt.score_disk(slot4, build["weights"]) == 22.6493
 
 
 def test_match_type_priority_beats_higher_score_best_score_only():

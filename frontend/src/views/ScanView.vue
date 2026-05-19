@@ -1,8 +1,8 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { diskIconFor } from '../diskIcons';
 
 const DISK_PLACEHOLDER_ASSET = '';
-const SET_ICON_ASSETS = {};
 const DEFAULT_METADATA = {
   disk_types: ['极地重金属', '啄木鸟电音', '震星迪斯科', '激素朋克', '獠牙重金属', '河豚电音', '自由蓝调'],
   main_stats: ['生命值', '攻击力', '防御力', '暴击率', '暴击伤害', '异常精通', '穿透率', '能量自动回复', '冲击力', '冰属性伤害'],
@@ -303,22 +303,23 @@ function changeHistoryPage(delta) {
 
 function setIconFor(disk) {
   const key = disk?.set_name || disk?.set || disk?.set_id;
-  return key ? SET_ICON_ASSETS[key] || '' : '';
+  return key ? diskIconFor(key) : '';
 }
 
 function placeholderStyle(disk) {
   const asset = disk?.asset || disk?.image || disk?.icon || setIconFor(disk) || DISK_PLACEHOLDER_ASSET;
+  const fallbackBackground =
+    'radial-gradient(circle at 50% 50%, #f6ce00 0 7%, #09090b 8% 13%, #52525b 14% 15%, #18181b 16% 31%, #71717a 32% 33%, #09090b 34% 52%, #3f3f46 53% 54%, #18181b 55% 100%)';
   if (asset) {
     return {
-      backgroundImage: `url("${asset}")`,
+      backgroundImage: `url("${asset}"), ${fallbackBackground}`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     };
   }
 
   return {
-    background:
-      'radial-gradient(circle at 50% 50%, #f6ce00 0 7%, #09090b 8% 13%, #52525b 14% 15%, #18181b 16% 31%, #71717a 32% 33%, #09090b 34% 52%, #3f3f46 53% 54%, #18181b 55% 100%)',
+    background: fallbackBackground,
   };
 }
 
@@ -328,6 +329,10 @@ async function callApi(name, ...args) {
     return unwrapResponse(await api[name](...args));
   }
 
+  if (name === 'start_maa_scan') {
+    throw new Error('未连接到后端窗口，无法启动 Maa 扫描；请使用桌面窗口启动项目。');
+  }
+
   return unwrapResponse(await mockApi(name, ...args));
 }
 
@@ -335,9 +340,7 @@ async function mockApi(name, scanId) {
   await new Promise((resolve) => window.setTimeout(resolve, 120));
 
   if (name === 'start_maa_scan') {
-    addLog('未连接后端窗口，使用演示扫描流程。');
-    simulateMockScan();
-    return { scan_id: 'mock-live-scan' };
+    throw new Error('未连接到后端窗口，无法启动 Maa 扫描；请使用桌面窗口启动项目。');
   }
 
   if (name === 'get_current_disks') return { disks: fallbackDisks };
@@ -355,27 +358,6 @@ async function mockApi(name, scanId) {
     };
   }
   return null;
-}
-
-function simulateMockScan() {
-  isScanning.value = true;
-  progress.value = 8;
-
-  const steps = [
-    [32, '连接 MAA 截图管线'],
-    [58, '识别驱动盘背包坐标'],
-    [84, '整理套装与主词条'],
-    [100, 'mock 扫描完成'],
-  ];
-
-  steps.forEach(([value, message], index) => {
-    window.setTimeout(() => {
-      handleProgress({ progress: value, message });
-      if (value === 100) {
-        handleComplete({ scan_id: 'mock-live-scan', disks: fallbackDisks });
-      }
-    }, 350 * (index + 1));
-  });
 }
 
 function eventPayload(event) {

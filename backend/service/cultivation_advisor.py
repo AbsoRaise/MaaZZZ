@@ -43,14 +43,13 @@ class CultivationAdvisor:
             high_value_count = sum(
                 1 for weight in sub_weights if weight >= high_weight_threshold
             )
-            current_score = self.optimizer.score_disk(disk, weights)
+            current_score = self.optimizer.score_disk(disk, weights, preferred_main_stats)
             main_stat_matched, main_stat_factor, main_stat_bonus, main_reason = (
                 self._main_stat_adjustment(disk, preferred_main_stats)
             )
             potential_score = round(
-                (current_score + effective_count * 2.0 + high_value_count * 4.0)
-                * main_stat_factor
-                + main_stat_bonus,
+                min(55.0, current_score + effective_count * 2.0 + high_value_count * 4.0)
+                * main_stat_factor,
                 4,
             )
             reasons = self._reasons(
@@ -91,7 +90,7 @@ class CultivationAdvisor:
         stat_name = self.optimizer._stat_name(disk.get("main_stat"))
         wanted = preferred_main_stats.get(slot, [])
         if wanted and stat_name in wanted:
-            return True, 1.0, 20.0, f"{slot} 号位主属性匹配：{stat_name}"
+            return True, 1.0, 0.0, f"{slot} 号位主属性匹配：{stat_name}"
         if wanted:
             return False, 0.5, 0.0, f"{slot} 号位主属性未命中推荐：{stat_name}"
         return None, 1.0, 0.0, None

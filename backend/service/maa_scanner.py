@@ -4,6 +4,7 @@ import json
 import re
 import shutil
 import time
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable, Protocol
 
@@ -19,6 +20,7 @@ from backend.service.maa_profile import (
     write_debug_artifacts,
     write_json,
 )
+from backend.service.disk_metadata import DiskMetadataStore
 
 
 ProgressCallback = Callable[[dict[str, Any]], None]
@@ -733,7 +735,13 @@ class MaaScanner:
         emit(5, "初始化 Maa 扫描配置")
         self.load_profile()
         emit(20, "检查 MaaFramework 连接状态")
-        self.connect()
+        try:
+            self.connect()
+        except Exception as exc:
+            message = str(exc)
+            logs.append(message)
+            write_debug_artifacts(self.debug_dir, {"error": message}, logs)
+            raise
         if self.is_maa_enabled():
             if hasattr(self.runtime, "scan_visible_grid"):
                 emit(35, "遍历当前可见驱动盘并识别详情")
@@ -1163,7 +1171,7 @@ def _parse_stat_line(
     top_y: int,
     bottom_y: int,
 ) -> dict[str, Any] | None:
-    candidates = [item for item in rows if top_y < item["y"] < bottom_y and _looks_like_stat_name(item["text"])]
+    candidates = [item for item in rows if top_y < item["y"] < bottom_y and _is_known_main_stat(item["text"])]
     if not candidates:
         return None
     label = min(candidates, key=lambda item: item["y"])
@@ -1173,14 +1181,16 @@ def _parse_stat_line(
 
 def _parse_sub_stat_lines(rows: list[dict[str, Any]], top_y: int) -> list[dict[str, Any]]:
     bottom_y = top_y + 155
-    labels = [item for item in rows if top_y < item["y"] < bottom_y and _looks_like_stat_name(item["text"])]
+    labels = [item for item in rows if top_y < item["y"] < bottom_y and _is_known_sub_stat(item["text"])]
     labels.sort(key=lambda item: (item["y"], item["x"]))
     stats: list[dict[str, Any]] = []
     for label in labels:
         name, upgrade = _strip_stat_upgrade(label["text"])
-        if name in {"主属性", "副属性"}:
+        if name in {"主属性", "副属性"} or not _is_known_sub_stat(name):
             continue
         value = _closest_value(rows, label)
+        if value is None:
+            continue
         extra_upgrade = _closest_upgrade(rows, label)
         stat: dict[str, Any] = {"name": name, "value": value or ""}
         if upgrade is not None or extra_upgrade is not None:
@@ -1197,6 +1207,29 @@ def _looks_like_stat_name(text: str) -> bool:
     if text.startswith("等级"):
         return False
     return True
+
+
+@lru_cache(maxsize=2)
+def _known_stat_names(kind: str) -> frozenset[str]:
+    try:
+        metadata = DiskMetadataStore().get_all()
+    except Exception:
+        metadata = {}
+    key = "main_stats" if kind == "main" else "sub_stats"
+    values = metadata.get(key) if isinstance(metadata, dict) else None
+    return frozenset(_normalize_stat_text(item) for item in values or [] if isinstance(item, str))
+
+
+def _normalize_stat_text(text: str) -> str:
+    return _strip_stat_upgrade(str(text or "").strip().replace(" ", ""))[0]
+
+
+def _is_known_main_stat(text: str) -> bool:
+    return _normalize_stat_text(text) in _known_stat_names("main")
+
+
+def _is_known_sub_stat(text: str) -> bool:
+    return _normalize_stat_text(text) in _known_stat_names("sub")
 
 
 def _strip_stat_upgrade(text: str) -> tuple[str, int | None]:
