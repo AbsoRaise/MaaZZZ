@@ -8,6 +8,8 @@ import pytest
 from backend.service.maa_scanner import (
     MaaScanner,
     _is_confirmed_empty_cell,
+    _reached_bottom_after_bottom_click,
+    _should_accept_detail_after_click,
     _should_stop_at_empty_or_unmatched_cell,
     grid_cells_from_template_matches,
     iter_grid_scan_targets,
@@ -292,22 +294,81 @@ def test_empty_cell_wins_over_inferred_disk_cell():
     assert _is_confirmed_empty_cell(empty_cells, disk_cells, 1, 3)
 
 
-def test_scan_stops_on_inferred_zero_score_cell_without_empty_template():
+def test_scan_does_not_stop_on_inferred_zero_score_cell_without_empty_template():
     disk_cells = [{"row": 1, "column": 3, "source": "template-inferred", "score": 0.0}]
 
-    assert _should_stop_at_empty_or_unmatched_cell([], disk_cells, 1, 3)
+    assert not _should_stop_at_empty_or_unmatched_cell([], disk_cells, 1, 3)
 
 
-def test_scan_stops_on_any_non_grid_zero_score_cell_without_empty_template():
+def test_scan_does_not_stop_on_any_non_grid_zero_score_cell_without_empty_template():
     disk_cells = [{"row": 1, "column": 3, "source": "template", "score": 0.0}]
 
-    assert _should_stop_at_empty_or_unmatched_cell([], disk_cells, 1, 3)
+    assert not _should_stop_at_empty_or_unmatched_cell([], disk_cells, 1, 3)
 
 
 def test_scan_continues_on_real_template_grid_cell_without_empty_template():
     disk_cells = [{"row": 1, "column": 3, "source": "template-grid", "score": 0.8}]
 
     assert not _should_stop_at_empty_or_unmatched_cell([], disk_cells, 1, 3)
+
+
+def test_bottom_click_reaches_end_when_screen_does_not_scroll():
+    assert _reached_bottom_after_bottom_click(
+        scroll_delta=2.0,
+        scroll_change_threshold=6.0,
+        selected_row=0,
+        auto_scroll_trigger_row=4,
+        stable_selected_row=3,
+    )
+
+
+def test_bottom_click_reaches_end_when_selected_stays_on_bottom_row():
+    assert _reached_bottom_after_bottom_click(
+        scroll_delta=20.0,
+        scroll_change_threshold=6.0,
+        selected_row=4,
+        auto_scroll_trigger_row=4,
+        stable_selected_row=3,
+    )
+
+
+def test_bottom_click_continues_when_screen_scrolls_and_selection_moves_up():
+    assert not _reached_bottom_after_bottom_click(
+        scroll_delta=20.0,
+        scroll_change_threshold=6.0,
+        selected_row=3,
+        auto_scroll_trigger_row=4,
+        stable_selected_row=3,
+    )
+
+
+def test_accepts_unchanged_detail_when_disk_template_matches():
+    assert _should_accept_detail_after_click(
+        detail_delta=0.2,
+        detail_change_threshold=3.0,
+        matched_cell={"source": "template-grid"},
+    )
+
+
+def test_rejects_unchanged_detail_without_direct_disk_template():
+    assert not _should_accept_detail_after_click(
+        detail_delta=0.2,
+        detail_change_threshold=3.0,
+        matched_cell={"source": "template-inferred"},
+    )
+    assert not _should_accept_detail_after_click(
+        detail_delta=0.2,
+        detail_change_threshold=3.0,
+        matched_cell=None,
+    )
+
+
+def test_accepts_changed_detail_without_direct_disk_template():
+    assert _should_accept_detail_after_click(
+        detail_delta=8.0,
+        detail_change_threshold=3.0,
+        matched_cell={"source": "template-inferred"},
+    )
 
 
 class FakeMaaRuntime:

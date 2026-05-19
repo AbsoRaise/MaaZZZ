@@ -145,14 +145,17 @@ class MaaFrameworkRuntime:
         auto_scroll_delay = float(actions.get("auto_scroll_delay_ms") or max(180, int(click_delay * 1000))) / 1000
         auto_scroll_settle_delay = float(actions.get("auto_scroll_settle_delay_ms") or 200) / 1000
         selected_retry_delay = float(actions.get("selected_retry_delay_ms") or 80) / 1000
+        max_consecutive_unknown_cells = int(actions.get("max_consecutive_unknown_cells") or (columns + 3))
         match_config = _dict_or_empty(grid.get("template_match"))
         grid_roi = _rect_or_default(match_config.get("roi"), [70, 160, 1280, 790])
         scroll_change_threshold = float(actions.get("scroll_change_threshold") or 6.0)
+        detail_change_threshold = float(actions.get("detail_change_threshold") or 3.0)
         disks: list[dict[str, Any]] = []
         logs: list[str] = _LiveLogList(self.debug_dir / "latest_logs.txt")
         logs.append("scanner_stop_rules=v2 inferred_zero_score_enabled=true")
         cached_grid_cells: list[dict[str, Any]] | None = None
         cached_empty_cells: list[dict[str, Any]] | None = None
+        consecutive_unknown_cells = 0
 
         def describe_cell(cell: dict[str, Any] | None) -> str:
             if not cell:
@@ -176,8 +179,20 @@ class MaaFrameworkRuntime:
             self.controller.post_screencap().wait()
             return _image_roi_copy(self.controller.cached_image, _scale_roi(grid_roi, profile, self.controller.cached_image))
 
+        def mark_unknown(reason: str) -> str:
+            nonlocal consecutive_unknown_cells
+            logs.append(reason)
+            consecutive_unknown_cells += 1
+            if consecutive_unknown_cells >= max_consecutive_unknown_cells:
+                logs.append(
+                    f"连续 {consecutive_unknown_cells} 个格子未识别到可信详情，"
+                    "为避免无限扫描，判定当前扫描结束"
+                )
+                return "empty"
+            return "unknown"
+
         def click_and_read(row: int, visual_row: int, column: int, delay: float) -> str:
-            nonlocal cached_grid_cells, cached_empty_cells
+            nonlocal cached_grid_cells, cached_empty_cells, consecutive_unknown_cells
             if cached_grid_cells is None:
                 refresh_cells()
             matched_cell = _cell_by_row_column(cached_grid_cells, visual_row, column)
@@ -208,11 +223,16 @@ class MaaFrameworkRuntime:
             )
 
             try:
+                self.controller.post_screencap().wait()
+                before_image = self.controller.cached_image
+                before_detail = _image_roi_copy(before_image, _scale_roi(detail_roi, profile, before_image))
                 self.controller.post_click(x, y).wait()
                 time.sleep(delay)
                 self.controller.post_screencap().wait()
                 image = self.controller.cached_image
                 scaled_roi = _scale_roi(detail_roi, profile, image)
+                after_detail = _image_roi_copy(image, scaled_roi)
+                detail_delta = _mean_abs_image_delta(before_detail, after_detail)
                 job = self.tasker.post_recognition(
                     JRecognitionType.OCR,
                     JOCR(roi=scaled_roi),
@@ -233,11 +253,25 @@ class MaaFrameworkRuntime:
                 return "error"
 
             if disk is None:
-                logs.append(f"跳过第 {row} 行第 {column} 个：未识别到驱动盘详情")
-                return "unknown"
+                return mark_unknown(f"跳过第 {row} 行第 {column} 个：未识别到驱动盘详情")
+
+            if not _should_accept_detail_after_click(
+                detail_delta=detail_delta,
+                detail_change_threshold=detail_change_threshold,
+                matched_cell=matched_cell,
+            ):
+                return mark_unknown(
+                    f"跳过第 {row} 行第 {column} 个：详情区域变化过小 "
+                    f"delta={detail_delta:.3f} <= {detail_change_threshold:.3f}，"
+                    "且当前格子没有明确驱动盘模板命中，疑似空位保留上一块详情"
+                )
 
             disks.append(validate_disk(disk))
-            logs.append(f"识别第 {row} 行第 {column} 个（可见第 {visual_row} 行，{click_source}）：{disk['set_name']} [{disk['slot']}]")
+            consecutive_unknown_cells = 0
+            logs.append(
+                f"识别第 {row} 行第 {column} 个（可见第 {visual_row} 行，{click_source}，"
+                f"detail_delta={detail_delta:.3f}）：{disk['set_name']} [{disk['slot']}]"
+            )
             return "disk"
 
         logical_row = 1
@@ -268,7 +302,13 @@ class MaaFrameworkRuntime:
                 f"threshold={scroll_change_threshold:.3f}, selected={describe_cell(selected_cell)}"
             )
             logs.append(f"底行点击后重新识别当前选中格: {describe_cell(selected_cell)}")
-            if scroll_delta <= scroll_change_threshold or selected_row == auto_scroll_trigger_row:
+            if _reached_bottom_after_bottom_click(
+                scroll_delta=scroll_delta,
+                scroll_change_threshold=scroll_change_threshold,
+                selected_row=selected_row,
+                auto_scroll_trigger_row=auto_scroll_trigger_row,
+                stable_selected_row=stable_selected_row,
+            ):
                 logs.append(f"第 {logical_row} 行第 1 个点击后仍选中第 {auto_scroll_trigger_row} 行，判定已到最后一行")
                 for column in range(2, columns + 1):
                     if click_and_read(logical_row, auto_scroll_trigger_row, column, click_delay) == "empty":
@@ -316,79 +356,6 @@ class MaaFrameworkRuntime:
 
         if logical_row > max_scan_rows:
             logs.append(f"已达到最大扫描行数 {max_scan_rows}，停止扫描")
-
-        return disks, logs
-
-        scan_targets = iter_grid_scan_targets(
-            rows=rows,
-            columns=columns,
-            scan_rows=scan_rows,
-            first=first,
-            gap=gap,
-            auto_scroll_trigger_row=auto_scroll_trigger_row,
-            stable_selected_row=stable_selected_row,
-        )
-        for target in scan_targets:
-            row = target["row"]
-            column = target["column"]
-            visual_row = target["visual_row"]
-            x = target["x"]
-            y = target["y"]
-            click_source = "fallback"
-            if cached_grid_cells is None:
-                cached_grid_cells = self._detect_visible_grid_cells(profile, rows, columns)
-                if cached_grid_cells:
-                    logs.append(f"Maa 模板匹配识别到 {len(cached_grid_cells)} 个可见驱动盘格子")
-                else:
-                    logs.append("Maa 模板匹配未识别到可用格子，回退到配置坐标")
-            matched_cell = _cell_by_row_column(cached_grid_cells, visual_row, column)
-            if matched_cell is not None:
-                x = matched_cell["x"]
-                y = matched_cell["y"]
-                click_source = str(matched_cell.get("source") or "template")
-            elif self.controller.cached_image is not None:
-                x, y = _scale_point_to_image(x, y, profile, self.controller.cached_image)
-            if target["causes_auto_scroll"]:
-                logs.append(f"点击底行第 {row} 行第 {column} 个，等待游戏自动上滚")
-            try:
-                self.controller.post_click(x, y).wait()
-                time.sleep(auto_scroll_delay if target["causes_auto_scroll"] else click_delay)
-                if target["causes_auto_scroll"]:
-                    cached_grid_cells = None
-
-                self.controller.post_screencap().wait()
-                image = self.controller.cached_image
-                scaled_roi = _scale_roi(detail_roi, profile, image)
-                job = self.tasker.post_recognition(
-                    JRecognitionType.OCR,
-                    JOCR(roi=scaled_roi),
-                    image,
-                )
-                job.wait()
-                task_detail = job.get()
-                ocr_results = self._ocr_results_from_task(task_detail)
-                disk = parse_detail_ocr_results(
-                    ocr_results,
-                    inventory_pos={
-                        "page": scan_page,
-                        "row": row,
-                        "column": column,
-                        "index": (row - 1) * columns + column,
-                    },
-                )
-            except Exception as exc:
-                logs.append(f"跳过第 {row} 行第 {column} 个：点击/识别失败：{exc}")
-                continue
-
-            if disk is None:
-                logs.append(f"跳过第 {row} 行第 {column} 个：未识别到驱动盘详情")
-                continue
-
-            disks.append(validate_disk(disk))
-            logs.append(
-                f"识别第 {row} 行第 {column} 个（可见第 {visual_row} 行，{click_source}）："
-                f"{disk['set_name']} [{disk['slot']}]"
-            )
 
         return disks, logs
 
@@ -1049,17 +1016,40 @@ def _empty_stop_reason(
     column: int,
 ) -> str | None:
     disk_cell = _cell_by_row_column(disk_cells, row, column)
-    if disk_cell is not None:
-        disk_source = str(disk_cell.get("source") or "").strip()
-        disk_score = float(disk_cell.get("score") or 0)
-        if disk_source == "template-grid":
-            return None
-        if disk_score <= 0:
-            return f"{disk_source or 'unmatched'}-zero-score"
+    if disk_cell is not None and str(disk_cell.get("source") or "").strip() == "template-grid":
+        return None
     empty_cell = _cell_by_row_column(empty_cells, row, column)
     if empty_cell is None:
         return None
     return "empty-template"
+
+
+def _reached_bottom_after_bottom_click(
+    *,
+    scroll_delta: float,
+    scroll_change_threshold: float,
+    selected_row: int,
+    auto_scroll_trigger_row: int,
+    stable_selected_row: int,
+) -> bool:
+    if scroll_delta <= scroll_change_threshold:
+        return True
+    if selected_row == auto_scroll_trigger_row:
+        return True
+    if selected_row == stable_selected_row:
+        return False
+    return False
+
+
+def _should_accept_detail_after_click(
+    *,
+    detail_delta: float,
+    detail_change_threshold: float,
+    matched_cell: dict[str, Any] | None,
+) -> bool:
+    if matched_cell is not None and str(matched_cell.get("source") or "").strip() == "template-grid":
+        return True
+    return detail_delta > detail_change_threshold
 
 
 def _normalize_match_result(
