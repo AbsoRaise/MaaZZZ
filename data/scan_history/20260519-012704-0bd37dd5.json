@@ -1,0 +1,7292 @@
+{
+  "scan_id": "20260519-012704-0bd37dd5",
+  "scanned_at": "2026-05-19T01:27:04",
+  "source": "maa",
+  "logs": [
+    "初始化 Maa 扫描配置",
+    "检查 MaaFramework 连接状态",
+    "遍历当前可见驱动盘并识别详情",
+    "Maa 模板匹配识别到 36 个可见驱动盘格子",
+    "template decision logical_row=1 visual_row=1 column=1: disk=row=1,col=1,score=0.799,source=template-grid,x=115,y=184 empty=none stop_reason=none",
+    "准备点击 logical_row=1 visual_row=1 column=1 target=(115,184) source=template-grid matched=row=1,col=1,score=0.799,source=template-grid,x=115,y=184 empty=none",
+    "识别第 1 行第 1 个（可见第 1 行，template-grid）：月光骑士颂 [1]",
+    "template decision logical_row=1 visual_row=1 column=2: disk=row=1,col=2,score=0.796,source=template-grid,x=205,y=184 empty=none stop_reason=none",
+    "准备点击 logical_row=1 visual_row=1 column=2 target=(205,184) source=template-grid matched=row=1,col=2,score=0.796,source=template-grid,x=205,y=184 empty=none",
+    "识别第 1 行第 2 个（可见第 1 行，template-grid）：拂晓生花 [1]",
+    "template decision logical_row=1 visual_row=1 column=3: disk=row=1,col=3,score=0.801,source=template-grid,x=295,y=184 empty=none stop_reason=none",
+    "准备点击 logical_row=1 visual_row=1 column=3 target=(295,184) source=template-grid matched=row=1,col=3,score=0.801,source=template-grid,x=295,y=184 empty=none",
+    "识别第 1 行第 3 个（可见第 1 行，template-grid）：拂晓生花 [1]",
+    "template decision logical_row=1 visual_row=1 column=4: disk=row=1,col=4,score=0.796,source=template-grid,x=385,y=184 empty=none stop_reason=none",
+    "准备点击 logical_row=1 visual_row=1 column=4 target=(385,184) source=template-grid matched=row=1,col=4,score=0.796,source=template-grid,x=385,y=184 empty=none",
+    "识别第 1 行第 4 个（可见第 1 行，template-grid）：山大王 [1]",
+    "template decision logical_row=1 visual_row=1 column=5: disk=row=1,col=5,score=0.800,source=template-grid,x=475,y=184 empty=none stop_reason=none",
+    "准备点击 logical_row=1 visual_row=1 column=5 target=(475,184) source=template-grid matched=row=1,col=5,score=0.800,source=template-grid,x=475,y=184 empty=none",
+    "识别第 1 行第 5 个（可见第 1 行，template-grid）：云岿如我 [1]",
+    "template decision logical_row=1 visual_row=1 column=6: disk=row=1,col=6,score=0.805,source=template-grid,x=565,y=184 empty=none stop_reason=none",
+    "准备点击 logical_row=1 visual_row=1 column=6 target=(565,184) source=template-grid matched=row=1,col=6,score=0.805,source=template-grid,x=565,y=184 empty=none",
+    "识别第 1 行第 6 个（可见第 1 行，template-grid）：法厄同之歌 [1]",
+    "template decision logical_row=1 visual_row=1 column=7: disk=row=1,col=7,score=0.804,source=template-grid,x=655,y=184 empty=none stop_reason=none",
+    "准备点击 logical_row=1 visual_row=1 column=7 target=(655,184) source=template-grid matched=row=1,col=7,score=0.804,source=template-grid,x=655,y=184 empty=none",
+    "识别第 1 行第 7 个（可见第 1 行，template-grid）：法厄同之歌 [1]",
+    "template decision logical_row=1 visual_row=1 column=8: disk=row=1,col=8,score=0.805,source=template-grid,x=745,y=184 empty=none stop_reason=none",
+    "准备点击 logical_row=1 visual_row=1 column=8 target=(745,184) source=template-grid matched=row=1,col=8,score=0.805,source=template-grid,x=745,y=184 empty=none",
+    "识别第 1 行第 8 个（可见第 1 行，template-grid）：法厄同之歌 [1]",
+    "template decision logical_row=1 visual_row=1 column=9: disk=row=1,col=9,score=0.805,source=template-grid,x=835,y=184 empty=none stop_reason=none",
+    "准备点击 logical_row=1 visual_row=1 column=9 target=(835,184) source=template-grid matched=row=1,col=9,score=0.805,source=template-grid,x=835,y=184 empty=none",
+    "识别第 1 行第 9 个（可见第 1 行，template-grid）：啄木鸟电音 [1]",
+    "template decision logical_row=2 visual_row=2 column=1: disk=row=2,col=1,score=0.793,source=template-grid,x=115,y=300 empty=none stop_reason=none",
+    "准备点击 logical_row=2 visual_row=2 column=1 target=(115,300) source=template-grid matched=row=2,col=1,score=0.793,source=template-grid,x=115,y=300 empty=none",
+    "识别第 2 行第 1 个（可见第 2 行，template-grid）：激素朋克 [1]",
+    "template decision logical_row=2 visual_row=2 column=2: disk=row=2,col=2,score=0.791,source=template-grid,x=205,y=300 empty=none stop_reason=none",
+    "准备点击 logical_row=2 visual_row=2 column=2 target=(205,300) source=template-grid matched=row=2,col=2,score=0.791,source=template-grid,x=205,y=300 empty=none",
+    "识别第 2 行第 2 个（可见第 2 行，template-grid）：激素朋克 [1]",
+    "template decision logical_row=2 visual_row=2 column=3: disk=row=2,col=3,score=0.794,source=template-grid,x=295,y=300 empty=none stop_reason=none",
+    "准备点击 logical_row=2 visual_row=2 column=3 target=(295,300) source=template-grid matched=row=2,col=3,score=0.794,source=template-grid,x=295,y=300 empty=none",
+    "识别第 2 行第 3 个（可见第 2 行，template-grid）：灵魂摇滚 [1]",
+    "template decision logical_row=2 visual_row=2 column=4: disk=row=2,col=4,score=0.795,source=template-grid,x=385,y=300 empty=none stop_reason=none",
+    "准备点击 logical_row=2 visual_row=2 column=4 target=(385,300) source=template-grid matched=row=2,col=4,score=0.795,source=template-grid,x=385,y=300 empty=none",
+    "识别第 2 行第 4 个（可见第 2 行，template-grid）：摇摆爵士 [1]",
+    "template decision logical_row=2 visual_row=2 column=5: disk=row=2,col=5,score=0.797,source=template-grid,x=475,y=300 empty=none stop_reason=none",
+    "准备点击 logical_row=2 visual_row=2 column=5 target=(475,300) source=template-grid matched=row=2,col=5,score=0.797,source=template-grid,x=475,y=300 empty=none",
+    "识别第 2 行第 5 个（可见第 2 行，template-grid）：摇摆爵士 [1]",
+    "template decision logical_row=2 visual_row=2 column=6: disk=row=2,col=6,score=0.801,source=template-grid,x=565,y=300 empty=none stop_reason=none",
+    "准备点击 logical_row=2 visual_row=2 column=6 target=(565,300) source=template-grid matched=row=2,col=6,score=0.801,source=template-grid,x=565,y=300 empty=none",
+    "识别第 2 行第 6 个（可见第 2 行，template-grid）：摇摆爵士 [1]",
+    "template decision logical_row=2 visual_row=2 column=7: disk=row=2,col=7,score=0.800,source=template-grid,x=655,y=300 empty=none stop_reason=none",
+    "准备点击 logical_row=2 visual_row=2 column=7 target=(655,300) source=template-grid matched=row=2,col=7,score=0.800,source=template-grid,x=655,y=300 empty=none",
+    "识别第 2 行第 7 个（可见第 2 行，template-grid）：混沌重金属 [1]",
+    "template decision logical_row=2 visual_row=2 column=8: disk=row=2,col=8,score=0.804,source=template-grid,x=745,y=300 empty=none stop_reason=none",
+    "准备点击 logical_row=2 visual_row=2 column=8 target=(745,300) source=template-grid matched=row=2,col=8,score=0.804,source=template-grid,x=745,y=300 empty=none",
+    "识别第 2 行第 8 个（可见第 2 行，template-grid）：獠牙重金属 [1]",
+    "template decision logical_row=2 visual_row=2 column=9: disk=row=2,col=9,score=0.000,source=template-inferred,x=835,y=300 empty=none stop_reason=none",
+    "准备点击 logical_row=2 visual_row=2 column=9 target=(835,300) source=template-inferred matched=row=2,col=9,score=0.000,source=template-inferred,x=835,y=300 empty=none",
+    "识别第 2 行第 9 个（可见第 2 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=3 visual_row=3 column=1: disk=row=3,col=1,score=0.000,source=template-inferred,x=115,y=416 empty=none stop_reason=none",
+    "准备点击 logical_row=3 visual_row=3 column=1 target=(115,416) source=template-inferred matched=row=3,col=1,score=0.000,source=template-inferred,x=115,y=416 empty=none",
+    "识别第 3 行第 1 个（可见第 3 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=3 visual_row=3 column=2: disk=row=3,col=2,score=0.000,source=template-inferred,x=205,y=416 empty=none stop_reason=none",
+    "准备点击 logical_row=3 visual_row=3 column=2 target=(205,416) source=template-inferred matched=row=3,col=2,score=0.000,source=template-inferred,x=205,y=416 empty=none",
+    "识别第 3 行第 2 个（可见第 3 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=3 visual_row=3 column=3: disk=row=3,col=3,score=0.000,source=template-inferred,x=295,y=416 empty=none stop_reason=none",
+    "准备点击 logical_row=3 visual_row=3 column=3 target=(295,416) source=template-inferred matched=row=3,col=3,score=0.000,source=template-inferred,x=295,y=416 empty=none",
+    "识别第 3 行第 3 个（可见第 3 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=3 visual_row=3 column=4: disk=row=3,col=4,score=0.000,source=template-inferred,x=385,y=416 empty=none stop_reason=none",
+    "准备点击 logical_row=3 visual_row=3 column=4 target=(385,416) source=template-inferred matched=row=3,col=4,score=0.000,source=template-inferred,x=385,y=416 empty=none",
+    "识别第 3 行第 4 个（可见第 3 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=3 visual_row=3 column=5: disk=row=3,col=5,score=0.000,source=template-inferred,x=475,y=416 empty=none stop_reason=none",
+    "准备点击 logical_row=3 visual_row=3 column=5 target=(475,416) source=template-inferred matched=row=3,col=5,score=0.000,source=template-inferred,x=475,y=416 empty=none",
+    "识别第 3 行第 5 个（可见第 3 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=3 visual_row=3 column=6: disk=row=3,col=6,score=0.000,source=template-inferred,x=565,y=416 empty=none stop_reason=none",
+    "准备点击 logical_row=3 visual_row=3 column=6 target=(565,416) source=template-inferred matched=row=3,col=6,score=0.000,source=template-inferred,x=565,y=416 empty=none",
+    "识别第 3 行第 6 个（可见第 3 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=3 visual_row=3 column=7: disk=row=3,col=7,score=0.000,source=template-inferred,x=655,y=416 empty=none stop_reason=none",
+    "准备点击 logical_row=3 visual_row=3 column=7 target=(655,416) source=template-inferred matched=row=3,col=7,score=0.000,source=template-inferred,x=655,y=416 empty=none",
+    "识别第 3 行第 7 个（可见第 3 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=3 visual_row=3 column=8: disk=row=3,col=8,score=0.000,source=template-inferred,x=745,y=416 empty=none stop_reason=none",
+    "准备点击 logical_row=3 visual_row=3 column=8 target=(745,416) source=template-inferred matched=row=3,col=8,score=0.000,source=template-inferred,x=745,y=416 empty=none",
+    "识别第 3 行第 8 个（可见第 3 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=3 visual_row=3 column=9: disk=row=3,col=9,score=0.000,source=template-inferred,x=835,y=416 empty=none stop_reason=none",
+    "准备点击 logical_row=3 visual_row=3 column=9 target=(835,416) source=template-inferred matched=row=3,col=9,score=0.000,source=template-inferred,x=835,y=416 empty=none",
+    "识别第 3 行第 9 个（可见第 3 行，template-inferred）：獠牙重金属 [1]",
+    "点击底行第 4 行第 1 个，判断是否继续下滑",
+    "template decision logical_row=4 visual_row=4 column=1: disk=row=4,col=1,score=0.000,source=template-inferred,x=115,y=532 empty=none stop_reason=none",
+    "准备点击 logical_row=4 visual_row=4 column=1 target=(115,532) source=template-inferred matched=row=4,col=1,score=0.000,source=template-inferred,x=115,y=532 empty=none",
+    "识别第 4 行第 1 个（可见第 4 行，template-inferred）：獠牙重金属 [1]",
+    "底行第 4 行第 1 个点击完成，等待 0.20s 后重新识别当前选中格",
+    "bottom-row click scroll_delta=1.060, threshold=6.000, selected=row=1,col=1,score=0.795,source=template-grid,x=116,y=184",
+    "底行点击后重新识别当前选中格: row=1,col=1,score=0.795,source=template-grid,x=116,y=184",
+    "第 4 行第 1 个点击后仍选中第 4 行，判定已到最后一行",
+    "template decision logical_row=4 visual_row=4 column=2: disk=row=4,col=2,score=0.000,source=template-inferred,x=205,y=532 empty=none stop_reason=none",
+    "准备点击 logical_row=4 visual_row=4 column=2 target=(205,532) source=template-inferred matched=row=4,col=2,score=0.000,source=template-inferred,x=205,y=532 empty=none",
+    "识别第 4 行第 2 个（可见第 4 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=4 visual_row=4 column=3: disk=row=4,col=3,score=0.000,source=template-inferred,x=295,y=532 empty=none stop_reason=none",
+    "准备点击 logical_row=4 visual_row=4 column=3 target=(295,532) source=template-inferred matched=row=4,col=3,score=0.000,source=template-inferred,x=295,y=532 empty=none",
+    "识别第 4 行第 3 个（可见第 4 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=4 visual_row=4 column=4: disk=row=4,col=4,score=0.000,source=template-inferred,x=385,y=532 empty=none stop_reason=none",
+    "准备点击 logical_row=4 visual_row=4 column=4 target=(385,532) source=template-inferred matched=row=4,col=4,score=0.000,source=template-inferred,x=385,y=532 empty=none",
+    "识别第 4 行第 4 个（可见第 4 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=4 visual_row=4 column=5: disk=row=4,col=5,score=0.000,source=template-inferred,x=475,y=532 empty=none stop_reason=none",
+    "准备点击 logical_row=4 visual_row=4 column=5 target=(475,532) source=template-inferred matched=row=4,col=5,score=0.000,source=template-inferred,x=475,y=532 empty=none",
+    "识别第 4 行第 5 个（可见第 4 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=4 visual_row=4 column=6: disk=row=4,col=6,score=0.000,source=template-inferred,x=565,y=532 empty=none stop_reason=none",
+    "准备点击 logical_row=4 visual_row=4 column=6 target=(565,532) source=template-inferred matched=row=4,col=6,score=0.000,source=template-inferred,x=565,y=532 empty=none",
+    "识别第 4 行第 6 个（可见第 4 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=4 visual_row=4 column=7: disk=row=4,col=7,score=0.000,source=template-inferred,x=655,y=532 empty=none stop_reason=none",
+    "准备点击 logical_row=4 visual_row=4 column=7 target=(655,532) source=template-inferred matched=row=4,col=7,score=0.000,source=template-inferred,x=655,y=532 empty=none",
+    "识别第 4 行第 7 个（可见第 4 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=4 visual_row=4 column=8: disk=row=4,col=8,score=0.000,source=template-inferred,x=745,y=532 empty=none stop_reason=none",
+    "准备点击 logical_row=4 visual_row=4 column=8 target=(745,532) source=template-inferred matched=row=4,col=8,score=0.000,source=template-inferred,x=745,y=532 empty=none",
+    "识别第 4 行第 8 个（可见第 4 行，template-inferred）：獠牙重金属 [1]",
+    "template decision logical_row=4 visual_row=4 column=9: disk=row=4,col=9,score=0.000,source=template-inferred,x=835,y=532 empty=none stop_reason=none",
+    "准备点击 logical_row=4 visual_row=4 column=9 target=(835,532) source=template-inferred matched=row=4,col=9,score=0.000,source=template-inferred,x=835,y=532 empty=none",
+    "识别第 4 行第 9 个（可见第 4 行，template-inferred）：獠牙重金属 [1]",
+    "MaaFramework 当前页识别完成：36 枚"
+  ],
+  "disk_count": 36,
+  "summary": {
+    "slot_counts": {
+      "1": 36
+    },
+    "set_counts": {
+      "月光骑士颂": 1,
+      "拂晓生花": 2,
+      "山大王": 1,
+      "云岿如我": 1,
+      "法厄同之歌": 3,
+      "啄木鸟电音": 1,
+      "激素朋克": 2,
+      "灵魂摇滚": 1,
+      "摇摆爵士": 3,
+      "混沌重金属": 1,
+      "獠牙重金属": 20
+    }
+  },
+  "disks": [
+    {
+      "slot": 1,
+      "set_name": "月光骑士颂",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 1,
+        "column": 1,
+        "index": 1
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "防御力",
+          "value": "4.8%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "月光骑士颂[1]",
+          "box": [
+            942,
+            178,
+            124,
+            26
+          ],
+          "score": 0.992102
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            22
+          ],
+          "score": 0.464638
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            947,
+            409,
+            52,
+            28
+          ],
+          "score": 0.998841
+        },
+        {
+          "text": "1",
+          "box": [
+            948,
+            215,
+            13,
+            14
+          ],
+          "score": 0.686043
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            376,
+            51,
+            27
+          ],
+          "score": 0.992141
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            299,
+            47,
+            24
+          ],
+          "score": 0.994712
+        },
+        {
+          "text": "防御力",
+          "box": [
+            949,
+            445,
+            50,
+            26
+          ],
+          "score": 0.991778
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            326,
+            48,
+            23
+          ],
+          "score": 0.999444
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997158
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            950,
+            478,
+            55,
+            22
+          ],
+          "score": 0.993554
+        },
+        {
+          "text": "月光骑士颂",
+          "box": [
+            952,
+            510,
+            69,
+            21
+          ],
+          "score": 0.971753
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.993204
+        },
+        {
+          "text": "-",
+          "box": [
+            1167,
+            236,
+            15,
+            15
+          ],
+          "score": 0.300344
+        },
+        {
+          "text": "4.8%",
+          "box": [
+            1168,
+            446,
+            46,
+            26
+          ],
+          "score": 0.995944
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998654
+        },
+        {
+          "text": "3%",
+          "box": [
+            1180,
+            410,
+            36,
+            29
+          ],
+          "score": 0.970714
+        },
+        {
+          "text": "15",
+          "box": [
+            1185,
+            377,
+            31,
+            28
+          ],
+          "score": 0.989771
+        }
+      ],
+      "id": "ba0b26c11f524f679b81302a3544fa38",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "拂晓生花",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 1,
+        "column": 2,
+        "index": 2
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "4.8%"
+        },
+        {
+          "name": "暴击率",
+          "value": "2.4%"
+        },
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "拂晓生花[1]",
+          "box": [
+            941,
+            179,
+            108,
+            25
+          ],
+          "score": 0.993456
+        },
+        {
+          "text": "1",
+          "box": [
+            948,
+            215,
+            13,
+            14
+          ],
+          "score": 0.701235
+        },
+        {
+          "text": "主属性",
+          "box": [
+            948,
+            298,
+            49,
+            27
+          ],
+          "score": 0.99154
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            376,
+            52,
+            28
+          ],
+          "score": 0.991757
+        },
+        {
+          "text": "生命值",
+          "box": [
+            949,
+            324,
+            50,
+            26
+          ],
+          "score": 0.999494
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            350,
+            49,
+            27
+          ],
+          "score": 0.990471
+        },
+        {
+          "text": "暴击率",
+          "box": [
+            949,
+            411,
+            50,
+            26
+          ],
+          "score": 0.996524
+        },
+        {
+          "text": "防御力",
+          "box": [
+            949,
+            445,
+            50,
+            27
+          ],
+          "score": 0.995741
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            949,
+            479,
+            50,
+            27
+          ],
+          "score": 0.999033
+        },
+        {
+          "text": "套热的甲",
+          "box": [
+            953,
+            514,
+            49,
+            14
+          ],
+          "score": 0.476366
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            976,
+            264,
+            88,
+            27
+          ],
+          "score": 0.988962
+        },
+        {
+          "text": "+",
+          "box": [
+            1148,
+            226,
+            11,
+            9
+          ],
+          "score": 0.861893
+        },
+        {
+          "text": "0",
+          "box": [
+            1151,
+            211,
+            20,
+            13
+          ],
+          "score": 0.336167
+        },
+        {
+          "text": "4.8%",
+          "box": [
+            1167,
+            377,
+            48,
+            27
+          ],
+          "score": 0.997326
+        },
+        {
+          "text": "2.4%",
+          "box": [
+            1168,
+            411,
+            47,
+            28
+          ],
+          "score": 0.99259
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998671
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            479,
+            32,
+            27
+          ],
+          "score": 0.900717
+        },
+        {
+          "text": "15",
+          "box": [
+            1183,
+            444,
+            34,
+            31
+          ],
+          "score": 0.967662
+        }
+      ],
+      "id": "7de50f3b91354bb2b7723c23e02831d9",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "拂晓生花",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 1,
+        "column": 3,
+        "index": 3
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "拂晓生花[1]",
+          "box": [
+            941,
+            179,
+            108,
+            25
+          ],
+          "score": 0.99327
+        },
+        {
+          "text": "1",
+          "box": [
+            948,
+            215,
+            13,
+            14
+          ],
+          "score": 0.712673
+        },
+        {
+          "text": "主属性",
+          "box": [
+            948,
+            298,
+            49,
+            27
+          ],
+          "score": 0.992011
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            948,
+            376,
+            52,
+            27
+          ],
+          "score": 0.996381
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            411,
+            51,
+            26
+          ],
+          "score": 0.993033
+        },
+        {
+          "text": "生命值",
+          "box": [
+            949,
+            445,
+            50,
+            27
+          ],
+          "score": 0.999439
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            949,
+            477,
+            58,
+            26
+          ],
+          "score": 0.975552
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            326,
+            48,
+            23
+          ],
+          "score": 0.999474
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            47,
+            23
+          ],
+          "score": 0.996855
+        },
+        {
+          "text": "拂晓生花",
+          "box": [
+            950,
+            509,
+            59,
+            22
+          ],
+          "score": 0.992013
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            266,
+            87,
+            25
+          ],
+          "score": 0.991648
+        },
+        {
+          "text": "it",
+          "box": [
+            1148,
+            226,
+            11,
+            7
+          ],
+          "score": 0.396904
+        },
+        {
+          "text": "0",
+          "box": [
+            1151,
+            211,
+            17,
+            13
+          ],
+          "score": 0.37741
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998683
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            377,
+            33,
+            27
+          ],
+          "score": 0.942519
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            446,
+            32,
+            26
+          ],
+          "score": 0.943834
+        },
+        {
+          "text": "15",
+          "box": [
+            1183,
+            409,
+            34,
+            33
+          ],
+          "score": 0.905775
+        }
+      ],
+      "id": "3b08227284e141d980a71b7bfe9b4df3",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "山大王",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 1,
+        "column": 4,
+        "index": 4
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "19"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "昇常精通",
+          "value": "9"
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "山大王[1]",
+          "box": [
+            941,
+            177,
+            90,
+            28
+          ],
+          "score": 0.975
+        },
+        {
+          "text": "1",
+          "box": [
+            949,
+            218,
+            11,
+            10
+          ],
+          "score": 0.949209
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            352,
+            47,
+            25
+          ],
+          "score": 0.991061
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994211
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.997585
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.99888
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            447,
+            47,
+            23
+          ],
+          "score": 0.998936
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998382
+        },
+        {
+          "text": "昇常精通",
+          "box": [
+            951,
+            481,
+            58,
+            23
+          ],
+          "score": 0.881318
+        },
+        {
+          "text": "5",
+          "box": [
+            952,
+            275,
+            15,
+            13
+          ],
+          "score": 0.952696
+        },
+        {
+          "text": "春糕站用",
+          "box": [
+            955,
+            516,
+            46,
+            11
+          ],
+          "score": 0.403986
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.993602
+        },
+        {
+          "text": "o",
+          "box": [
+            1148,
+            207,
+            40,
+            23
+          ],
+          "score": 0.47025
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            25
+          ],
+          "score": 0.936698
+        },
+        {
+          "text": "15",
+          "box": [
+            1184,
+            375,
+            33,
+            31
+          ],
+          "score": 0.996039
+        },
+        {
+          "text": "19",
+          "box": [
+            1186,
+            412,
+            29,
+            27
+          ],
+          "score": 0.996677
+        },
+        {
+          "text": "9",
+          "box": [
+            1196,
+            482,
+            16,
+            22
+          ],
+          "score": 0.98251
+        }
+      ],
+      "id": "0e12b44167784e1599043042e8da1eb0",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "云岿如我",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 1,
+        "column": 5,
+        "index": 5
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "云岿如我[1]",
+          "box": [
+            941,
+            178,
+            108,
+            27
+          ],
+          "score": 0.917099
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            22
+          ],
+          "score": 0.497129
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            47,
+            23
+          ],
+          "score": 0.994167
+        },
+        {
+          "text": "防御力",
+          "box": [
+            949,
+            376,
+            50,
+            27
+          ],
+          "score": 0.993636
+        },
+        {
+          "text": "生命值",
+          "box": [
+            949,
+            411,
+            50,
+            26
+          ],
+          "score": 0.999357
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997141
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            447,
+            48,
+            23
+          ],
+          "score": 0.998788
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            950,
+            479,
+            56,
+            23
+          ],
+          "score": 0.992277
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            47,
+            23
+          ],
+          "score": 0.998918
+        },
+        {
+          "text": "云道如我",
+          "box": [
+            951,
+            509,
+            58,
+            22
+          ],
+          "score": 0.841123
+        },
+        {
+          "text": "1",
+          "box": [
+            952,
+            220,
+            6,
+            5
+          ],
+          "score": 0.437544
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.993486
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998659
+        },
+        {
+          "text": "3%",
+          "box": [
+            1180,
+            410,
+            36,
+            29
+          ],
+          "score": 0.970013
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            25
+          ],
+          "score": 0.936957
+        },
+        {
+          "text": "15",
+          "box": [
+            1185,
+            377,
+            31,
+            28
+          ],
+          "score": 0.990091
+        }
+      ],
+      "id": "975871d4837d4fdd9df073e442ffc6fc",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "法厄同之歌",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 1,
+        "column": 6,
+        "index": 6
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "4.8%"
+        },
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "暴击率",
+          "value": "2.4%"
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "法厄同之歌[1]",
+          "box": [
+            943,
+            181,
+            120,
+            21
+          ],
+          "score": 0.991523
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            22
+          ],
+          "score": 0.527344
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            409,
+            49,
+            28
+          ],
+          "score": 0.890897
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.995045
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.997869
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            447,
+            47,
+            23
+          ],
+          "score": 0.998927
+        },
+        {
+          "text": "副属性",
+          "box": [
+            951,
+            354,
+            45,
+            22
+          ],
+          "score": 0.996081
+        },
+        {
+          "text": "暴击率",
+          "box": [
+            951,
+            480,
+            46,
+            24
+          ],
+          "score": 0.999809
+        },
+        {
+          "text": "1",
+          "box": [
+            952,
+            220,
+            7,
+            5
+          ],
+          "score": 0.647401
+        },
+        {
+          "text": "生命值",
+          "box": [
+            952,
+            328,
+            44,
+            19
+          ],
+          "score": 0.999537
+        },
+        {
+          "text": "春热站用",
+          "box": [
+            954,
+            516,
+            47,
+            11
+          ],
+          "score": 0.46466
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            978,
+            268,
+            85,
+            21
+          ],
+          "score": 0.993558
+        },
+        {
+          "text": "4.8%",
+          "box": [
+            1169,
+            379,
+            44,
+            24
+          ],
+          "score": 0.985213
+        },
+        {
+          "text": "2.4%",
+          "box": [
+            1170,
+            481,
+            42,
+            24
+          ],
+          "score": 0.975517
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998997
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            446,
+            32,
+            26
+          ],
+          "score": 0.945508
+        },
+        {
+          "text": "15",
+          "box": [
+            1183,
+            409,
+            34,
+            34
+          ],
+          "score": 0.941693
+        }
+      ],
+      "id": "e87e2d7f771049198bbe6e7b856b1e50",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "法厄同之歌",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 1,
+        "column": 7,
+        "index": 7
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "防御力",
+          "value": "4.8%"
+        },
+        {
+          "name": "昇常精通",
+          "value": "9"
+        },
+        {
+          "name": "防御力",
+          "value": "15"
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "法厄同之歌[1]",
+          "box": [
+            943,
+            181,
+            121,
+            21
+          ],
+          "score": 0.992813
+        },
+        {
+          "text": "1",
+          "box": [
+            950,
+            218,
+            10,
+            8
+          ],
+          "score": 0.964636
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.999296
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            413,
+            47,
+            22
+          ],
+          "score": 0.994408
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            479,
+            47,
+            26
+          ],
+          "score": 0.981413
+        },
+        {
+          "text": "主属性",
+          "box": [
+            951,
+            302,
+            43,
+            20
+          ],
+          "score": 0.994057
+        },
+        {
+          "text": "昇常精通",
+          "box": [
+            951,
+            448,
+            58,
+            22
+          ],
+          "score": 0.928451
+        },
+        {
+          "text": "生命值",
+          "box": [
+            952,
+            328,
+            44,
+            19
+          ],
+          "score": 0.999496
+        },
+        {
+          "text": "副属性",
+          "box": [
+            952,
+            355,
+            42,
+            19
+          ],
+          "score": 0.994798
+        },
+        {
+          "text": "春热站用",
+          "box": [
+            955,
+            516,
+            46,
+            11
+          ],
+          "score": 0.419858
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            979,
+            268,
+            84,
+            21
+          ],
+          "score": 0.994955
+        },
+        {
+          "text": "S",
+          "box": [
+            1158,
+            229,
+            29,
+            26
+          ],
+          "score": 0.461804
+        },
+        {
+          "text": "4.8%",
+          "box": [
+            1170,
+            413,
+            43,
+            23
+          ],
+          "score": 0.988149
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            36,
+            23
+          ],
+          "score": 0.999045
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            378,
+            33,
+            26
+          ],
+          "score": 0.914125
+        },
+        {
+          "text": "15",
+          "box": [
+            1187,
+            479,
+            27,
+            27
+          ],
+          "score": 0.987773
+        },
+        {
+          "text": "9",
+          "box": [
+            1194,
+            447,
+            20,
+            26
+          ],
+          "score": 0.982971
+        }
+      ],
+      "id": "5d801b1f21ec4710946e5bce0fb317e4",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "法厄同之歌",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 1,
+        "column": 8,
+        "index": 8
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "穿运值",
+          "value": "9"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "法厄同之歌[1]",
+          "box": [
+            943,
+            181,
+            120,
+            21
+          ],
+          "score": 0.990725
+        },
+        {
+          "text": "穿运值",
+          "box": [
+            949,
+            409,
+            50,
+            28
+          ],
+          "score": 0.887926
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.993685
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            354,
+            45,
+            22
+          ],
+          "score": 0.998339
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.997538
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            447,
+            47,
+            23
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.989918
+        },
+        {
+          "text": "5",
+          "box": [
+            952,
+            275,
+            15,
+            13
+          ],
+          "score": 0.962234
+        },
+        {
+          "text": "生命值",
+          "box": [
+            952,
+            328,
+            44,
+            19
+          ],
+          "score": 0.999505
+        },
+        {
+          "text": "法厄同之歌",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.998801
+        },
+        {
+          "text": "1",
+          "box": [
+            953,
+            220,
+            5,
+            5
+          ],
+          "score": 0.562296
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.99294
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998977
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.946823
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            378,
+            29,
+            26
+          ],
+          "score": 0.997334
+        },
+        {
+          "text": "9",
+          "box": [
+            1195,
+            414,
+            19,
+            24
+          ],
+          "score": 0.990768
+        }
+      ],
+      "id": "3789c8f3001d426aa6207c50f2837493",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "啄木鸟电音",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 1,
+        "column": 9,
+        "index": 9
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "暴击率",
+          "value": "2.4%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "啄木鸟电音[1]",
+          "box": [
+            941,
+            180,
+            124,
+            24
+          ],
+          "score": 0.997097
+        },
+        {
+          "text": "S",
+          "box": [
+            946,
+            268,
+            23,
+            23
+          ],
+          "score": 0.446328
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            948,
+            376,
+            51,
+            27
+          ],
+          "score": 0.996649
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            411,
+            51,
+            26
+          ],
+          "score": 0.992704
+        },
+        {
+          "text": "1",
+          "box": [
+            949,
+            218,
+            11,
+            10
+          ],
+          "score": 0.959617
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            47,
+            23
+          ],
+          "score": 0.994555
+        },
+        {
+          "text": "暴击率",
+          "box": [
+            949,
+            445,
+            50,
+            26
+          ],
+          "score": 0.998605
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            949,
+            477,
+            58,
+            26
+          ],
+          "score": 0.980069
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.99672
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            47,
+            23
+          ],
+          "score": 0.998968
+        },
+        {
+          "text": "啄木鸟电音",
+          "box": [
+            951,
+            509,
+            71,
+            21
+          ],
+          "score": 0.931461
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.993983
+        },
+        {
+          "text": "EMPT",
+          "box": [
+            1132,
+            274,
+            37,
+            11
+          ],
+          "score": 0.974716
+        },
+        {
+          "text": "0点0",
+          "box": [
+            1139,
+            196,
+            48,
+            37
+          ],
+          "score": 0.595691
+        },
+        {
+          "text": "2.4%",
+          "box": [
+            1168,
+            446,
+            46,
+            26
+          ],
+          "score": 0.987699
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            327,
+            38,
+            23
+          ],
+          "score": 0.9993
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            377,
+            33,
+            27
+          ],
+          "score": 0.944022
+        },
+        {
+          "text": "15",
+          "box": [
+            1184,
+            409,
+            34,
+            31
+          ],
+          "score": 0.864475
+        }
+      ],
+      "id": "19554d382c64456593f91a8f914b131c",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "激素朋克",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 2,
+        "column": 1,
+        "index": 10
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "激素朋克[1]",
+          "box": [
+            941,
+            179,
+            108,
+            25
+          ],
+          "score": 0.987651
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            270,
+            22,
+            20
+          ],
+          "score": 0.720126
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            376,
+            52,
+            27
+          ],
+          "score": 0.9926
+        },
+        {
+          "text": "生命值",
+          "box": [
+            948,
+            408,
+            52,
+            29
+          ],
+          "score": 0.999281
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            299,
+            47,
+            24
+          ],
+          "score": 0.994036
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            949,
+            445,
+            50,
+            26
+          ],
+          "score": 0.998362
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            949,
+            477,
+            58,
+            26
+          ],
+          "score": 0.98003
+        },
+        {
+          "text": "激素朋克",
+          "box": [
+            949,
+            508,
+            60,
+            23
+          ],
+          "score": 0.884741
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            326,
+            48,
+            23
+          ],
+          "score": 0.999504
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997268
+        },
+        {
+          "text": "1",
+          "box": [
+            951,
+            220,
+            9,
+            6
+          ],
+          "score": 0.863677
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            266,
+            87,
+            25
+          ],
+          "score": 0.99149
+        },
+        {
+          "text": "O",
+          "box": [
+            1148,
+            208,
+            23,
+            20
+          ],
+          "score": 0.333336
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998665
+        },
+        {
+          "text": "3%",
+          "box": [
+            1180,
+            410,
+            36,
+            29
+          ],
+          "score": 0.97102
+        },
+        {
+          "text": "3%",
+          "box": [
+            1181,
+            446,
+            33,
+            26
+          ],
+          "score": 0.919858
+        },
+        {
+          "text": "15",
+          "box": [
+            1185,
+            377,
+            31,
+            28
+          ],
+          "score": 0.990018
+        }
+      ],
+      "id": "151e894b7e8f4fe396af8b38a1ccc758",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "激素朋克",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 2,
+        "column": 2,
+        "index": 11
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "穿透值",
+          "value": "9"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "激素朋克[1]",
+          "box": [
+            941,
+            179,
+            108,
+            25
+          ],
+          "score": 0.988177
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            948,
+            376,
+            51,
+            27
+          ],
+          "score": 0.996884
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            411,
+            51,
+            26
+          ],
+          "score": 0.993257
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            299,
+            47,
+            24
+          ],
+          "score": 0.996425
+        },
+        {
+          "text": "穿透值",
+          "box": [
+            949,
+            445,
+            50,
+            26
+          ],
+          "score": 0.910432
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            949,
+            477,
+            58,
+            26
+          ],
+          "score": 0.9737
+        },
+        {
+          "text": "激素朋克",
+          "box": [
+            949,
+            508,
+            60,
+            23
+          ],
+          "score": 0.898969
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            326,
+            48,
+            23
+          ],
+          "score": 0.999472
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997394
+        },
+        {
+          "text": "1",
+          "box": [
+            952,
+            220,
+            7,
+            5
+          ],
+          "score": 0.649464
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            976,
+            264,
+            88,
+            27
+          ],
+          "score": 0.988863
+        },
+        {
+          "text": "0",
+          "box": [
+            1148,
+            207,
+            23,
+            21
+          ],
+          "score": 0.496591
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998668
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            378,
+            33,
+            26
+          ],
+          "score": 0.92219
+        },
+        {
+          "text": "15",
+          "box": [
+            1184,
+            410,
+            31,
+            30
+          ],
+          "score": 0.966257
+        },
+        {
+          "text": "9",
+          "box": [
+            1195,
+            449,
+            17,
+            21
+          ],
+          "score": 0.986068
+        }
+      ],
+      "id": "39beefaf9eab43f686e5d8a5fd0d1bff",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "灵魂摇滚",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 2,
+        "column": 3,
+        "index": 12
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "异常精通",
+          "value": "9"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "灵魂摇滚[1]",
+          "box": [
+            943,
+            180,
+            105,
+            24
+          ],
+          "score": 0.990229
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            46,
+            23
+          ],
+          "score": 0.98865
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997268
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.997868
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998877
+        },
+        {
+          "text": "异常精通",
+          "box": [
+            950,
+            446,
+            60,
+            25
+          ],
+          "score": 0.90777
+        },
+        {
+          "text": "1",
+          "box": [
+            951,
+            220,
+            9,
+            6
+          ],
+          "score": 0.863677
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            23
+          ],
+          "score": 0.999391
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            55,
+            23
+          ],
+          "score": 0.993352
+        },
+        {
+          "text": "5",
+          "box": [
+            952,
+            275,
+            15,
+            13
+          ],
+          "score": 0.956183
+        },
+        {
+          "text": "灵魂摇滚",
+          "box": [
+            952,
+            511,
+            57,
+            18
+          ],
+          "score": 0.938537
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.993337
+        },
+        {
+          "text": "NGC",
+          "box": [
+            1131,
+            188,
+            62,
+            48
+          ],
+          "score": 0.366123
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998994
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            25
+          ],
+          "score": 0.913053
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            30,
+            28
+          ],
+          "score": 0.960123
+        },
+        {
+          "text": "9",
+          "box": [
+            1195,
+            449,
+            17,
+            21
+          ],
+          "score": 0.984372
+        }
+      ],
+      "id": "79f2c3a1b4ec4c9091e049282c66a0fe",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "摇摆爵士",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 2,
+        "column": 4,
+        "index": 13
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "摇摆爵士[1]",
+          "box": [
+            942,
+            179,
+            107,
+            25
+          ],
+          "score": 0.957346
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            376,
+            52,
+            27
+          ],
+          "score": 0.992179
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            948,
+            411,
+            51,
+            26
+          ],
+          "score": 0.998173
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            299,
+            47,
+            24
+          ],
+          "score": 0.995886
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            353,
+            47,
+            23
+          ],
+          "score": 0.99846
+        },
+        {
+          "text": "生命值",
+          "box": [
+            949,
+            445,
+            50,
+            27
+          ],
+          "score": 0.999464
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            949,
+            477,
+            58,
+            26
+          ],
+          "score": 0.977329
+        },
+        {
+          "text": "摇摆爵士",
+          "box": [
+            949,
+            508,
+            60,
+            23
+          ],
+          "score": 0.787498
+        },
+        {
+          "text": "1",
+          "box": [
+            950,
+            219,
+            10,
+            8
+          ],
+          "score": 0.962107
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            326,
+            48,
+            23
+          ],
+          "score": 0.999459
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            976,
+            264,
+            88,
+            27
+          ],
+          "score": 0.989418
+        },
+        {
+          "text": "EMPT",
+          "box": [
+            1135,
+            274,
+            33,
+            10
+          ],
+          "score": 0.935132
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998637
+        },
+        {
+          "text": "3%",
+          "box": [
+            1180,
+            410,
+            36,
+            30
+          ],
+          "score": 0.976242
+        },
+        {
+          "text": "3%",
+          "box": [
+            1181,
+            446,
+            33,
+            26
+          ],
+          "score": 0.924416
+        },
+        {
+          "text": "15",
+          "box": [
+            1185,
+            377,
+            31,
+            28
+          ],
+          "score": 0.989818
+        }
+      ],
+      "id": "895b9a0058c44295adc43cfa0d0822d1",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "摇摆爵士",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 2,
+        "column": 5,
+        "index": 14
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "暴击伤害",
+          "value": "4.8%"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "摇摆爵士[1]",
+          "box": [
+            942,
+            179,
+            107,
+            25
+          ],
+          "score": 0.959931
+        },
+        {
+          "text": "G",
+          "box": [
+            946,
+            267,
+            24,
+            23
+          ],
+          "score": 0.944177
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            948,
+            411,
+            51,
+            26
+          ],
+          "score": 0.99813
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            299,
+            47,
+            24
+          ],
+          "score": 0.995904
+        },
+        {
+          "text": "防御力",
+          "box": [
+            949,
+            445,
+            50,
+            26
+          ],
+          "score": 0.991916
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            949,
+            477,
+            58,
+            26
+          ],
+          "score": 0.97728
+        },
+        {
+          "text": "摇摆爵士",
+          "box": [
+            949,
+            508,
+            60,
+            23
+          ],
+          "score": 0.800287
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            326,
+            48,
+            23
+          ],
+          "score": 0.999497
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997428
+        },
+        {
+          "text": "暴击伤害",
+          "box": [
+            950,
+            377,
+            60,
+            26
+          ],
+          "score": 0.997695
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            976,
+            264,
+            88,
+            27
+          ],
+          "score": 0.988905
+        },
+        {
+          "text": "4.8%",
+          "box": [
+            1168,
+            377,
+            47,
+            27
+          ],
+          "score": 0.998141
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998679
+        },
+        {
+          "text": "3%",
+          "box": [
+            1180,
+            410,
+            36,
+            30
+          ],
+          "score": 0.976408
+        },
+        {
+          "text": "15",
+          "box": [
+            1185,
+            445,
+            30,
+            27
+          ],
+          "score": 0.993446
+        }
+      ],
+      "id": "b51caf3143324dca926ceb825e5aa3a6",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "摇摆爵士",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 2,
+        "column": 6,
+        "index": 15
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "摇摆爵士[1]",
+          "box": [
+            942,
+            179,
+            107,
+            25
+          ],
+          "score": 0.959761
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            411,
+            51,
+            26
+          ],
+          "score": 0.992704
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            299,
+            47,
+            24
+          ],
+          "score": 0.996272
+        },
+        {
+          "text": "生命值",
+          "box": [
+            949,
+            376,
+            50,
+            28
+          ],
+          "score": 0.999493
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            949,
+            445,
+            50,
+            26
+          ],
+          "score": 0.998296
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            949,
+            477,
+            58,
+            26
+          ],
+          "score": 0.980069
+        },
+        {
+          "text": "摇摆爵士",
+          "box": [
+            949,
+            508,
+            60,
+            23
+          ],
+          "score": 0.796829
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            326,
+            48,
+            23
+          ],
+          "score": 0.99946
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.99672
+        },
+        {
+          "text": "1",
+          "box": [
+            952,
+            220,
+            7,
+            5
+          ],
+          "score": 0.652214
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            976,
+            264,
+            88,
+            27
+          ],
+          "score": 0.989203
+        },
+        {
+          "text": "EMPT",
+          "box": [
+            1134,
+            273,
+            34,
+            13
+          ],
+          "score": 0.93671
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998624
+        },
+        {
+          "text": "15",
+          "box": [
+            1181,
+            407,
+            38,
+            37
+          ],
+          "score": 0.965476
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            377,
+            33,
+            27
+          ],
+          "score": 0.944022
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            446,
+            32,
+            26
+          ],
+          "score": 0.945039
+        }
+      ],
+      "id": "2bb24f1889df4af78ba39fa47e165419",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "混沌重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 2,
+        "column": 7,
+        "index": 16
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "穿透值",
+          "value": "9"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "混沌重金属[1]",
+          "box": [
+            942,
+            180,
+            124,
+            24
+          ],
+          "score": 0.998276
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            948,
+            376,
+            51,
+            27
+          ],
+          "score": 0.996198
+        },
+        {
+          "text": "防御力",
+          "box": [
+            948,
+            411,
+            51,
+            26
+          ],
+          "score": 0.993155
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            948,
+            476,
+            59,
+            27
+          ],
+          "score": 0.805502
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            299,
+            47,
+            24
+          ],
+          "score": 0.996043
+        },
+        {
+          "text": "穿透值",
+          "box": [
+            949,
+            445,
+            50,
+            26
+          ],
+          "score": 0.899175
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            326,
+            48,
+            23
+          ],
+          "score": 0.999468
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997359
+        },
+        {
+          "text": "混沌重金属",
+          "box": [
+            951,
+            511,
+            70,
+            18
+          ],
+          "score": 0.896181
+        },
+        {
+          "text": "1",
+          "box": [
+            952,
+            220,
+            6,
+            5
+          ],
+          "score": 0.429066
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.993471
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            326,
+            38,
+            24
+          ],
+          "score": 0.998672
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            378,
+            33,
+            26
+          ],
+          "score": 0.92311
+        },
+        {
+          "text": "15",
+          "box": [
+            1184,
+            410,
+            31,
+            30
+          ],
+          "score": 0.966638
+        },
+        {
+          "text": "9",
+          "box": [
+            1195,
+            449,
+            18,
+            21
+          ],
+          "score": 0.98635
+        }
+      ],
+      "id": "a710c8c7e13e4065a63be1430de07d27",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 2,
+        "column": 8,
+        "index": 17
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "攻击力",
+          "value": "19"
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            941,
+            178,
+            125,
+            26
+          ],
+          "score": 0.994399
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            47,
+            23
+          ],
+          "score": 0.994923
+        },
+        {
+          "text": "生命值",
+          "box": [
+            949,
+            409,
+            50,
+            28
+          ],
+          "score": 0.999582
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            949,
+            479,
+            49,
+            26
+          ],
+          "score": 0.998103
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997359
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.997849
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            447,
+            47,
+            23
+          ],
+          "score": 0.998928
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            23
+          ],
+          "score": 0.999404
+        },
+        {
+          "text": "5",
+          "box": [
+            952,
+            275,
+            15,
+            13
+          ],
+          "score": 0.96964
+        },
+        {
+          "text": "春热站用",
+          "box": [
+            954,
+            516,
+            47,
+            11
+          ],
+          "score": 0.475605
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.993471
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            327,
+            38,
+            23
+          ],
+          "score": 0.999316
+        },
+        {
+          "text": "15",
+          "box": [
+            1182,
+            374,
+            36,
+            33
+          ],
+          "score": 0.996711
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.942131
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            446,
+            32,
+            26
+          ],
+          "score": 0.945297
+        },
+        {
+          "text": "19",
+          "box": [
+            1184,
+            477,
+            31,
+            30
+          ],
+          "score": 0.961319
+        }
+      ],
+      "id": "d887e08e16d54bec8ce3f67a8987fd49",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 2,
+        "column": 9,
+        "index": 18
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            124,
+            24
+          ],
+          "score": 0.994258
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            46,
+            23
+          ],
+          "score": 0.987603
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            352,
+            47,
+            25
+          ],
+          "score": 0.991307
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            324,
+            47,
+            25
+          ],
+          "score": 0.999543
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.997921
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998869
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            445,
+            49,
+            26
+          ],
+          "score": 0.999635
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.989955
+        },
+        {
+          "text": "5",
+          "box": [
+            952,
+            275,
+            15,
+            13
+          ],
+          "score": 0.959686
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.75114
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.993591
+        },
+        {
+          "text": "550",
+          "box": [
+            1176,
+            327,
+            38,
+            23
+          ],
+          "score": 0.999293
+        },
+        {
+          "text": "3%",
+          "box": [
+            1181,
+            412,
+            33,
+            26
+          ],
+          "score": 0.925291
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.94574
+        },
+        {
+          "text": "15",
+          "box": [
+            1185,
+            377,
+            31,
+            28
+          ],
+          "score": 0.990024
+        }
+      ],
+      "id": "d504048f0bf742c78b881902401b62b0",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 3,
+        "column": 1,
+        "index": 19
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            23
+          ],
+          "score": 0.502133
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            352,
+            47,
+            25
+          ],
+          "score": 0.988559
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "f09886805df24fada38b7e01edd39c69",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 3,
+        "column": 2,
+        "index": 20
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            946,
+            269,
+            23,
+            23
+          ],
+          "score": 0.37118
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            352,
+            47,
+            25
+          ],
+          "score": 0.988559
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "6b4583c43d6044f691966ab705461733",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 3,
+        "column": 3,
+        "index": 21
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            23
+          ],
+          "score": 0.502133
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            352,
+            47,
+            25
+          ],
+          "score": 0.988559
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "0773260406d3499db7be7b3cedb379d1",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 3,
+        "column": 4,
+        "index": 22
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            22
+          ],
+          "score": 0.338053
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            352,
+            47,
+            25
+          ],
+          "score": 0.988559
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "95d19ebcb43746429595248ddcbb3071",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 3,
+        "column": 5,
+        "index": 23
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            22
+          ],
+          "score": 0.338053
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "副属性",
+          "box": [
+            951,
+            354,
+            45,
+            22
+          ],
+          "score": 0.996323
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "生命值",
+          "box": [
+            952,
+            328,
+            44,
+            19
+          ],
+          "score": 0.999646
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            27
+          ],
+          "score": 0.988873
+        }
+      ],
+      "id": "9dfb5c4ab1334a1da9e922977dbda912",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 3,
+        "column": 6,
+        "index": 24
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            948,
+            270,
+            20,
+            20
+          ],
+          "score": 0.736218
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "副属性",
+          "box": [
+            951,
+            354,
+            45,
+            22
+          ],
+          "score": 0.996323
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "生命值",
+          "box": [
+            952,
+            328,
+            44,
+            19
+          ],
+          "score": 0.999646
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            27
+          ],
+          "score": 0.988873
+        }
+      ],
+      "id": "a826901dda474079a5a7d2a1bb9925c6",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 3,
+        "column": 7,
+        "index": 25
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            352,
+            47,
+            25
+          ],
+          "score": 0.988559
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "5",
+          "box": [
+            951,
+            275,
+            16,
+            13
+          ],
+          "score": 0.948321
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "de5f925ee22843458ad9d6b73c0ca049",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 3,
+        "column": 8,
+        "index": 26
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            22
+          ],
+          "score": 0.338053
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            46,
+            23
+          ],
+          "score": 0.988115
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            352,
+            47,
+            25
+          ],
+          "score": 0.988559
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "1158c0bb4561471d923a9e3c34532dca",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 3,
+        "column": 9,
+        "index": 27
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            22
+          ],
+          "score": 0.338053
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            46,
+            23
+          ],
+          "score": 0.988115
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997232
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            445,
+            49,
+            26
+          ],
+          "score": 0.999676
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "d2ae585b270b48a382dd73b8111a7583",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 4,
+        "column": 1,
+        "index": 28
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            124,
+            24
+          ],
+          "score": 0.995226
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            23
+          ],
+          "score": 0.502133
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            47,
+            23
+          ],
+          "score": 0.993273
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997232
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            950,
+            445,
+            49,
+            26
+          ],
+          "score": 0.999676
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            55,
+            22
+          ],
+          "score": 0.990272
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1180,
+            410,
+            35,
+            29
+          ],
+          "score": 0.964919
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1183,
+            374,
+            35,
+            33
+          ],
+          "score": 0.994895
+        }
+      ],
+      "id": "bec2f237a9e049b1977468836fba65fa",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 4,
+        "column": 2,
+        "index": 29
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            23
+          ],
+          "score": 0.502133
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            46,
+            23
+          ],
+          "score": 0.988115
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997232
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "cf879c0df488493da587b2ecca7626f9",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 4,
+        "column": 3,
+        "index": 30
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "S",
+          "box": [
+            947,
+            269,
+            22,
+            23
+          ],
+          "score": 0.502133
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            46,
+            23
+          ],
+          "score": 0.988115
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997232
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "1e6cb156c1ad42dea961dc65a19064a6",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 4,
+        "column": 4,
+        "index": 31
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "?",
+          "box": [
+            946,
+            268,
+            23,
+            24
+          ],
+          "score": 0.321456
+        },
+        {
+          "text": "主属性",
+          "box": [
+            949,
+            300,
+            46,
+            23
+          ],
+          "score": 0.988115
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997232
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "d92e043c809c4e54961026d5792d5d48",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 4,
+        "column": 5,
+        "index": 32
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "副属性",
+          "box": [
+            949,
+            352,
+            47,
+            25
+          ],
+          "score": 0.988559
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "5",
+          "box": [
+            951,
+            275,
+            16,
+            13
+          ],
+          "score": 0.948321
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "d6a9496407ce46879cb0a1408a91343e",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 4,
+        "column": 6,
+        "index": 33
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            353,
+            46,
+            23
+          ],
+          "score": 0.997232
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "5",
+          "box": [
+            951,
+            275,
+            16,
+            13
+          ],
+          "score": 0.948321
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            28
+          ],
+          "score": 0.965113
+        }
+      ],
+      "id": "8b3d6dee80184c0081d6e51227ab693b",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 4,
+        "column": 7,
+        "index": 34
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            354,
+            46,
+            22
+          ],
+          "score": 0.997682
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "5",
+          "box": [
+            951,
+            275,
+            16,
+            13
+          ],
+          "score": 0.948321
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            27
+          ],
+          "score": 0.988873
+        }
+      ],
+      "id": "a759e58b68354036bf4bd0f495280d6b",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 4,
+        "column": 8,
+        "index": 35
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "5",
+          "box": [
+            951,
+            275,
+            16,
+            13
+          ],
+          "score": 0.948321
+        },
+        {
+          "text": "副属性",
+          "box": [
+            951,
+            354,
+            45,
+            22
+          ],
+          "score": 0.996323
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "生命值",
+          "box": [
+            952,
+            328,
+            44,
+            19
+          ],
+          "score": 0.999646
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            27
+          ],
+          "score": 0.988873
+        }
+      ],
+      "id": "9c26ebfebcd2490ab92fc7503a87f83f",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    },
+    {
+      "slot": 1,
+      "set_name": "獠牙重金属",
+      "rarity": "S",
+      "level": 0,
+      "inventory_pos": {
+        "page": 1,
+        "row": 4,
+        "column": 9,
+        "index": 36
+      },
+      "main_stat": {
+        "name": "生命值",
+        "value": "550"
+      },
+      "sub_stats": [
+        {
+          "name": "防御力",
+          "value": "15"
+        },
+        {
+          "name": "攻击力",
+          "value": "3%"
+        },
+        {
+          "name": "生命值",
+          "value": "3%"
+        },
+        {
+          "name": "套装效果",
+          "value": ""
+        }
+      ],
+      "ocr_raw": [
+        {
+          "text": "獠牙重金属[1]",
+          "box": [
+            942,
+            180,
+            123,
+            24
+          ],
+          "score": 0.995112
+        },
+        {
+          "text": "主属性",
+          "box": [
+            950,
+            300,
+            45,
+            23
+          ],
+          "score": 0.994624
+        },
+        {
+          "text": "副属性",
+          "box": [
+            950,
+            352,
+            46,
+            25
+          ],
+          "score": 0.994342
+        },
+        {
+          "text": "防御力",
+          "box": [
+            950,
+            378,
+            48,
+            24
+          ],
+          "score": 0.998266
+        },
+        {
+          "text": "攻击力",
+          "box": [
+            950,
+            412,
+            48,
+            23
+          ],
+          "score": 0.998501
+        },
+        {
+          "text": "5",
+          "box": [
+            951,
+            275,
+            16,
+            13
+          ],
+          "score": 0.948321
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            326,
+            46,
+            22
+          ],
+          "score": 0.998948
+        },
+        {
+          "text": "生命值",
+          "box": [
+            951,
+            447,
+            47,
+            23
+          ],
+          "score": 0.999763
+        },
+        {
+          "text": "套装效果",
+          "box": [
+            951,
+            479,
+            54,
+            22
+          ],
+          "score": 0.991662
+        },
+        {
+          "text": "猜牙重金尾",
+          "box": [
+            952,
+            511,
+            69,
+            18
+          ],
+          "score": 0.807189
+        },
+        {
+          "text": "等级00/15",
+          "box": [
+            977,
+            267,
+            87,
+            24
+          ],
+          "score": 0.994418
+        },
+        {
+          "text": "550",
+          "box": [
+            1177,
+            327,
+            37,
+            23
+          ],
+          "score": 0.998996
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            412,
+            32,
+            26
+          ],
+          "score": 0.948706
+        },
+        {
+          "text": "3%",
+          "box": [
+            1182,
+            447,
+            32,
+            24
+          ],
+          "score": 0.95441
+        },
+        {
+          "text": "15",
+          "box": [
+            1186,
+            377,
+            29,
+            27
+          ],
+          "score": 0.988873
+        }
+      ],
+      "id": "055d60082ad840a4a477f15f4de6c670",
+      "scan_meta": {
+        "scan_id": "20260519-012704-0bd37dd5",
+        "scanned_at": "2026-05-19T01:27:04"
+      }
+    }
+  ]
+}

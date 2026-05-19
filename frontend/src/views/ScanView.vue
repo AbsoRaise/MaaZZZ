@@ -83,6 +83,8 @@ const selectedScanDisks = ref([]);
 const lastError = ref('');
 const metadata = ref(DEFAULT_METADATA);
 const characterBuilds = ref({});
+const currentPage = ref(1);
+const pageSize = 12;
 const filters = ref({
   diskType: '',
   rarity: '',
@@ -114,9 +116,11 @@ const filteredDisks = computed(() => {
     return true;
   });
 });
-const activeWeights = computed(() => {
-  const firstBuild = Object.values(characterBuilds.value || {})[0];
-  return normalizeWeights(firstBuild?.weights || DEFAULT_WEIGHTS);
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredDisks.value.length / pageSize)));
+const displayPage = computed(() => Math.min(currentPage.value, totalPages.value));
+const pagedDisks = computed(() => {
+  const start = (displayPage.value - 1) * pageSize;
+  return filteredDisks.value.slice(start, start + pageSize);
 });
 const statOptions = computed(() => {
   const values = new Set([...(metadata.value.main_stats || []), ...(metadata.value.sub_stats || [])]);
@@ -189,11 +193,10 @@ function diskIdOf(disk, index) {
 }
 
 function inventoryLabel(pos) {
-  if (!pos) return 'P- / R- / C-';
-  const page = pos.page ?? pos.p ?? pos[0] ?? '-';
+  if (!pos) return '第 - 行 / 第 - 个';
   const row = pos.row ?? pos.r ?? pos[1] ?? '-';
   const col = pos.column ?? pos.col ?? pos.c ?? pos[2] ?? '-';
-  return `P${page} / R${row} / C${col}`;
+  return `第 ${row} 行 / 第 ${col} 个`;
 }
 
 function statName(statValue) {
@@ -241,35 +244,13 @@ function diskHasStat(disk, stat) {
   return statName(disk?.main_stat || disk?.main) === stat || subStatsOf(disk).some((sub) => statName(sub) === stat);
 }
 
-function diskScore(disk) {
-  const weights = activeWeights.value;
-  const main = disk?.main_stat || disk?.main;
-  const mainScore = numericValue(main) * (weights[statName(main)] || 0) * 2;
-  const subScore = subStatsOf(disk).reduce((sum, sub) => sum + numericValue(sub) * (weights[statName(sub)] || 0), 0);
-  return roundScore(mainScore + subScore);
-}
-
-function embryoScore(disk) {
-  const weights = activeWeights.value;
-  const level = Number(disk?.level ?? disk?.upgrade_level ?? 0) || 0;
-  const effectiveSubs = subStatsOf(disk).filter((sub) => (weights[statName(sub)] || 0) > 0);
-  const highSubs = effectiveSubs.filter((sub) => (weights[statName(sub)] || 0) >= 0.8);
-  const mainBonus = (weights[statName(disk?.main_stat || disk?.main)] || 0) * 8;
-  const growthRoom = Math.max(0, 15 - level) * 0.35;
-  return roundScore(effectiveSubs.length * 4 + highSubs.length * 5 + mainBonus + growthRoom);
-}
-
-function numericValue(statValue) {
-  if (statValue && typeof statValue === 'object') return Number(statValue.value) || 0;
-  return 0;
-}
-
-function roundScore(value) {
-  return Math.round((Number(value) || 0) * 100) / 100;
-}
-
 function resetFilters() {
   filters.value = { diskType: '', rarity: '', slot: '', stat: '' };
+  currentPage.value = 1;
+}
+
+function changePage(delta) {
+  currentPage.value = Math.min(totalPages.value, Math.max(1, displayPage.value + delta));
 }
 
 function setIconFor(disk) {
@@ -393,10 +374,12 @@ async function startScan() {
   lastError.value = '';
   selectedScan.value = null;
   selectedScanDisks.value = [];
+  currentPage.value = 1;
   progress.value = 0;
   logs.value = [];
   isScanning.value = true;
   addLog('启动扫描任务。');
+  addLog('提示：扫描不会自动切到游戏前台，但会在后台控制绝区零窗口；扫描期间请不要手动点击仓库。');
 
   try {
     await callApi('start_maa_scan');
@@ -447,6 +430,7 @@ async function loadScanResult(item) {
 
   try {
     selectedScan.value = item;
+    currentPage.value = 1;
     const result = await callApi('get_scan_result', scanId);
     selectedScanDisks.value = normalizeDisks(result);
     addLog(`载入历史 ${scanId}。`);
@@ -494,6 +478,7 @@ async function useScanResult(item) {
     }
     selectedScan.value = null;
     selectedScanDisks.value = [];
+    currentPage.value = 1;
     addLog(`已将历史 ${scanId} 设为当前盘池。`);
   } catch (error) {
     lastError.value = errorMessageOf(error);
@@ -505,9 +490,7 @@ async function locateDisk(disk) {
   try {
     const result = await callApi('locate_disk', disk);
     const target = result?.target || {};
-    addLog(
-      `${result?.message || '定位预览已生成'}：P${target.page ?? '-'} / R${target.row ?? '-'} / C${target.column ?? '-'}`
-    );
+    addLog(`${result?.message || '定位预览已生成'}：第 ${target.row ?? '-'} 行 / 第 ${target.column ?? '-'} 个`);
   } catch (error) {
     lastError.value = errorMessageOf(error);
     addLog(`定位预览失败：${lastError.value}`);
@@ -543,6 +526,10 @@ onBeforeUnmount(() => {
           >
             {{ isScanning ? '扫描中...' : '启动扫描' }}
           </button>
+
+          <p v-if="isScanning" class="border-l-4 border-[#f6ce00] bg-zinc-950 p-3 font-mono text-xs font-black text-zinc-200">
+            扫描会在后台控制绝区零窗口，不会自动切到前台；请保持仓库界面打开，扫描期间不要手动点击。
+          </p>
 
           <div class="rounded-sm border-2 border-zinc-700 bg-zinc-950 p-3">
             <div class="mb-2 flex items-center justify-between font-mono text-xs font-black uppercase">
@@ -645,9 +632,19 @@ onBeforeUnmount(() => {
             <button class="hard-button w-full" type="button" @click="resetFilters">重置筛选</button>
           </div>
         </div>
+        <div
+          v-if="filteredDisks.length"
+          class="flex flex-wrap items-center justify-between gap-3 border-b-4 border-zinc-800 p-4 font-mono text-xs font-black"
+        >
+          <span class="text-zinc-400">第 {{ displayPage }} / {{ totalPages }} 页，每页 {{ pageSize }} 枚</span>
+          <div class="flex gap-2">
+            <button class="hard-button py-1" type="button" :disabled="displayPage <= 1" @click="changePage(-1)">上一页</button>
+            <button class="hard-button py-1" type="button" :disabled="displayPage >= totalPages" @click="changePage(1)">下一页</button>
+          </div>
+        </div>
         <div class="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3">
           <article
-            v-for="(disk, index) in filteredDisks"
+            v-for="(disk, index) in pagedDisks"
             :key="diskIdOf(disk, index)"
             class="group rounded-sm border-4 bg-zinc-950 p-3 transition duration-100 hover:-translate-y-1"
             :class="rarityClass(disk)"
@@ -673,10 +670,6 @@ onBeforeUnmount(() => {
               </div>
             </div>
             <div class="mt-3 grid grid-cols-2 gap-2 border-t-2 border-zinc-800 pt-3 font-mono text-xs font-black">
-              <span class="text-zinc-500">驱动盘分数</span>
-              <span class="text-right text-[#f6ce00]">{{ diskScore(disk) }}</span>
-              <span class="text-zinc-500">胚子分数</span>
-              <span class="text-right text-emerald-300">{{ embryoScore(disk) }}</span>
               <span class="text-zinc-500">主词条</span>
               <span class="truncate text-right text-zinc-200">{{ statName(disk.main_stat || disk.main) }} {{ statValue(disk.main_stat || disk.main) }}</span>
             </div>

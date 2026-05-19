@@ -129,6 +129,12 @@ class DesktopApi:
         except Exception as exc:
             return fail(exc)
 
+    def test_maa_connection(self) -> dict[str, Any]:
+        try:
+            return ok(self.maa_scanner.test_connection())
+        except Exception as exc:
+            return fail(exc)
+
     def locate_disk(self, disk_or_pos: dict[str, Any]) -> dict[str, Any]:
         try:
             return ok(self.maa_scanner.locate_disk(disk_or_pos))
@@ -208,4 +214,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

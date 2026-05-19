@@ -26,7 +26,11 @@ DEFAULT_SCAN_PROFILE: dict[str, Any] = {
     "actions": {
         "click_delay_ms": 300,
         "page_delay_ms": 600,
-        "detail_open_delay_ms": 400,
+        "detail_open_delay_ms": 120,
+        "auto_scroll_delay_ms": 180,
+        "auto_scroll_settle_delay_ms": 200,
+        "selected_retry_delay_ms": 80,
+        "scroll_change_threshold": 6.0,
     },
     "ocr_regions": {
         "slot": None,
@@ -46,15 +50,38 @@ DEFAULT_SCAN_PROFILE: dict[str, Any] = {
         "dbg_path": None,
         "hwnd": None,
         "window_regex": ".*绝区零.*|.*Zenless.*|.*ZZZ.*",
-        "class_regex": ".*",
-        "screencap": "Background",
+        "class_regex": "UnityWndClass",
+        "screencap": "PrintWindow",
         "mouse": "PostMessageWithCursorPos",
         "keyboard": "PostMessage",
-        "pipeline_override": {
-            "ScanDisks": {
-                "action": "DoNothing"
-            }
+        "pipeline_override": {},
+        "visible_grid": {
+            "rows": 4,
+            "columns": 9,
+            "first_cell_center": [166, 276],
+            "cell_gap": [136, 175],
+            "scan_rows": 4,
+            "max_scan_rows": 400,
+            "auto_scroll_trigger_row": 4,
+            "stable_selected_row": 3,
+            "template_match": {
+                "enabled": True,
+                "templates": ["disk_cell.png", "disk_cell_selected.png"],
+                "selected_templates": ["disk_cell_selected.png"],
+                "empty_templates": ["disk_cell_empty.png", "empty_cell.png"],
+                "empty_templates_threshold": [0.9, 0.9],
+                "roi": [100, 210, 1220, 680],
+                "first_cell_center": [66, 66],
+                "box_coordinate_space": "auto",
+                "threshold": [0.78, 0.78],
+                "order_by": "Vertical",
+                "click_offset": [32, -21],
+                "row_tolerance": 70,
+                "dedupe_tolerance": [55, 55],
+            },
         },
+        "detail_ocr_roi": [1380, 258, 470, 540],
+        "scan_page": 1,
     },
 }
 
@@ -91,7 +118,7 @@ def load_scan_profile(profile_path: Path | str | None = None) -> dict[str, Any]:
     if not path.exists():
         ensure_scan_resource_tree(path.parents[1])
     try:
-        with path.open("r", encoding="utf-8") as file:
+        with path.open("r", encoding="utf-8-sig") as file:
             raw = json.load(file)
     except json.JSONDecodeError as exc:
         raise ValueError(f"扫描配置 JSON 损坏：{path}") from exc
