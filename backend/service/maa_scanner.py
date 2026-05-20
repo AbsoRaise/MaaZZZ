@@ -150,7 +150,7 @@ class MaaFrameworkRuntime:
         max_consecutive_unknown_cells = int(actions.get("max_consecutive_unknown_cells") or (columns + 3))
         match_config = _dict_or_empty(grid.get("template_match"))
         grid_roi = _rect_or_default(match_config.get("roi"), [70, 160, 1280, 790])
-        scroll_change_threshold = float(actions.get("scroll_change_threshold") or 6.0)
+        scroll_change_threshold = float(actions.get("scroll_change_threshold") or 2.3)
         detail_change_threshold = float(actions.get("detail_change_threshold") or 3.0)
         disks: list[dict[str, Any]] = []
         logs: list[str] = _LiveLogList(self.debug_dir / "latest_logs.txt")
@@ -1040,12 +1040,12 @@ def _reached_bottom_after_bottom_click(
     auto_scroll_trigger_row: int,
     stable_selected_row: int,
 ) -> bool:
-    if scroll_delta <= scroll_change_threshold:
-        return True
     if selected_row == auto_scroll_trigger_row:
         return True
     if selected_row == stable_selected_row:
         return False
+    if scroll_delta <= scroll_change_threshold:
+        return True
     return False
 
 

@@ -358,7 +358,7 @@ def test_scan_continues_on_real_template_grid_cell_without_empty_template():
 def test_bottom_click_reaches_end_when_screen_does_not_scroll():
     assert _reached_bottom_after_bottom_click(
         scroll_delta=2.0,
-        scroll_change_threshold=6.0,
+        scroll_change_threshold=2.3,
         selected_row=0,
         auto_scroll_trigger_row=4,
         stable_selected_row=3,
@@ -368,7 +368,7 @@ def test_bottom_click_reaches_end_when_screen_does_not_scroll():
 def test_bottom_click_reaches_end_when_selected_stays_on_bottom_row():
     assert _reached_bottom_after_bottom_click(
         scroll_delta=20.0,
-        scroll_change_threshold=6.0,
+        scroll_change_threshold=2.3,
         selected_row=4,
         auto_scroll_trigger_row=4,
         stable_selected_row=3,
@@ -378,8 +378,38 @@ def test_bottom_click_reaches_end_when_selected_stays_on_bottom_row():
 def test_bottom_click_continues_when_screen_scrolls_and_selection_moves_up():
     assert not _reached_bottom_after_bottom_click(
         scroll_delta=20.0,
-        scroll_change_threshold=6.0,
+        scroll_change_threshold=2.3,
         selected_row=3,
+        auto_scroll_trigger_row=4,
+        stable_selected_row=3,
+    )
+
+
+def test_bottom_click_continues_when_stable_selection_moves_up_even_if_delta_is_small():
+    assert not _reached_bottom_after_bottom_click(
+        scroll_delta=2.0,
+        scroll_change_threshold=2.3,
+        selected_row=3,
+        auto_scroll_trigger_row=4,
+        stable_selected_row=3,
+    )
+
+
+def test_bottom_click_reaches_end_when_abnormal_selection_and_delta_is_small():
+    assert _reached_bottom_after_bottom_click(
+        scroll_delta=2.0,
+        scroll_change_threshold=2.3,
+        selected_row=2,
+        auto_scroll_trigger_row=4,
+        stable_selected_row=3,
+    )
+
+
+def test_bottom_click_continues_when_abnormal_selection_but_delta_is_above_threshold():
+    assert not _reached_bottom_after_bottom_click(
+        scroll_delta=2.617,
+        scroll_change_threshold=2.3,
+        selected_row=2,
         auto_scroll_trigger_row=4,
         stable_selected_row=3,
     )

@@ -30,7 +30,7 @@ DEFAULT_SCAN_PROFILE: dict[str, Any] = {
         "auto_scroll_delay_ms": 180,
         "auto_scroll_settle_delay_ms": 200,
         "selected_retry_delay_ms": 80,
-        "scroll_change_threshold": 6.0,
+        "scroll_change_threshold": 2.3,
         "detail_change_threshold": 3.0,
         "max_consecutive_unknown_cells": 12,
     },
