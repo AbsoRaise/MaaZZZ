@@ -7,6 +7,7 @@ from typing import Any
 
 from backend.service.character_config_manager import CharacterConfigManager
 from backend.service.cultivation_advisor import CultivationAdvisor
+from backend.service.discard_advisor import DiscardAdvisor
 from backend.service.disk_store import DiskStore
 from backend.service.disk_metadata import DiskMetadataStore
 from backend.service.maa_scanner import MaaScanner
@@ -118,6 +119,21 @@ class DesktopApi:
                 character_name,
                 options,
                 self.disk_store.get_current_disks(),
+            )
+            return ok(result)
+        except Exception as exc:
+            return fail(exc)
+
+    def get_discard_analysis(
+        self,
+        disks: list[dict[str, Any]] | None = None,
+        options: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        try:
+            advisor = DiscardAdvisor(self.character_config_manager.get_all())
+            result = advisor.analyze_disks(
+                disks if isinstance(disks, list) else self.disk_store.get_current_disks(),
+                options,
             )
             return ok(result)
         except Exception as exc:

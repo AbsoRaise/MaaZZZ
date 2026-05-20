@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from itertools import product
+from time import perf_counter
 from typing import Any
 
 from backend.model.schemas import normalize_slot_main_stats
@@ -17,7 +17,7 @@ MATCH_TYPE_PRIORITY = {
 
 SLOT_FULL_SCORE = 55.0
 MAIN_STAT_EQUIVALENT_SUB_STATS = 3.0
-MAX_SUB_STAT_ROLLS = 9
+MAX_SUB_STAT_UPGRADES = 5
 RARITY_SCORE_MULTIPLIER = {
     "S": 1.0,
     "A": 0.67,
@@ -77,8 +77,21 @@ class DiskOptimizer:
         target_set_2 = self._string_or_empty(merged_config.get("target_set_2"))
 
         warnings: list[str] = []
+        logs: list[str] = []
+        started_at = perf_counter()
         candidates_by_slot = self._candidates_by_slot(all_disks, merged_config, warnings)
-        best = self._best_combo(candidates_by_slot, weights, preferred_main_stats, target_set_4, target_set_2)
+        candidate_counts = {slot: len(candidates_by_slot.get(slot, [])) for slot in range(1, 7)}
+        brute_force_count = self._combination_count(candidates_by_slot)
+        logs.append(f"候选数量: {candidate_counts}")
+        logs.append(f"原始组合数量估算: {brute_force_count}")
+        best = self._best_combo(
+            candidates_by_slot,
+            weights,
+            preferred_main_stats,
+            target_set_4,
+            target_set_2,
+            logs,
+        )
         if best is None:
             raise ValueError("no valid disk combination found")
 
@@ -98,6 +111,7 @@ class DiskOptimizer:
             "is_fallback": is_fallback,
             "warnings": warnings,
             "score_breakdown": score_breakdown,
+            "optimize_logs": logs + [f"总耗时: {perf_counter() - started_at:.3f}s"],
         }
 
     def _merge_config(self, build: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
@@ -176,20 +190,44 @@ class DiskOptimizer:
         preferred_main_stats: dict[int, list[str]],
         target_set_4: str,
         target_set_2: str,
+        logs: list[str] | None = None,
     ) -> tuple[list[dict[str, Any] | None], float, Counter[str], str, list[dict[str, Any]]] | None:
         best_key: tuple[int, float] | None = None
         best_value = None
-
-        for combo_tuple in product(*(candidates_by_slot[slot] for slot in range(1, 7))):
-            combo = list(combo_tuple)
-            set_counts = Counter(
-                disk.get("set_name")
-                for disk in combo
-                if isinstance(disk, dict) and isinstance(disk.get("set_name"), str) and disk.get("set_name")
+        prepared_by_slot = self._best_candidates_by_slot_and_set(candidates_by_slot, weights, preferred_main_stats)
+        if logs is not None:
+            logs.append(
+                "压缩后候选数量: "
+                + str({slot: len(prepared_by_slot.get(slot, [])) for slot in range(1, 7)})
             )
+
+        states: dict[tuple[tuple[str, int], ...], tuple[float, list[dict[str, Any] | None], list[float]]] = {
+            tuple(): (0.0, [], [])
+        }
+        state_counts: list[str] = []
+        for slot in range(1, 7):
+            next_states: dict[tuple[tuple[str, int], ...], tuple[float, list[dict[str, Any] | None], list[float]]] = {}
+            for state, (score_sum, combo, scores) in states.items():
+                for candidate in prepared_by_slot.get(slot, [self._prepared_empty_candidate()]):
+                    next_state = self._advance_set_state(state, candidate["set_name"])
+                    next_score = round(score_sum + candidate["score"], 4)
+                    previous = next_states.get(next_state)
+                    if previous is None or next_score > previous[0]:
+                        next_states[next_state] = (
+                            next_score,
+                            combo + [candidate["disk"]],
+                            scores + [candidate["score"]],
+                        )
+            states = next_states
+            state_counts.append(f"{slot}号位后状态数={len(states)}")
+
+        if logs is not None:
+            logs.extend(state_counts)
+            logs.append(f"动态规划最终状态数: {len(states)}")
+
+        for state, (total_score, combo, scores) in states.items():
+            set_counts = Counter(dict(state))
             match_type = self._match_type(set_counts, target_set_4, target_set_2)
-            scores = [self.score_disk(disk, weights, preferred_main_stats) if isinstance(disk, dict) else 0 for disk in combo]
-            total_score = round(sum(scores), 4)
             key = (MATCH_TYPE_PRIORITY[match_type], -total_score)
             if best_key is None or key < best_key:
                 best_key = key
@@ -200,6 +238,48 @@ class DiskOptimizer:
                 best_value = (combo, total_score, set_counts, match_type, score_breakdown)
 
         return best_value
+
+    def _combination_count(self, candidates_by_slot: dict[int, list[dict[str, Any] | None]]) -> int:
+        count = 1
+        for slot in range(1, 7):
+            count *= max(1, len(candidates_by_slot.get(slot, [])))
+        return count
+
+    def _best_candidates_by_slot_and_set(
+        self,
+        candidates_by_slot: dict[int, list[dict[str, Any] | None]],
+        weights: dict[str, float],
+        preferred_main_stats: dict[int, list[str]],
+    ) -> dict[int, list[dict[str, Any]]]:
+        prepared: dict[int, list[dict[str, Any]]] = {}
+        for slot in range(1, 7):
+            best_by_set: dict[str | None, dict[str, Any]] = {}
+            for disk in candidates_by_slot.get(slot, [None]):
+                if not isinstance(disk, dict):
+                    candidate = self._prepared_empty_candidate()
+                else:
+                    set_name = disk.get("set_name") if isinstance(disk.get("set_name"), str) else None
+                    candidate = {
+                        "set_name": set_name,
+                        "disk": disk,
+                        "score": self.score_disk(disk, weights, preferred_main_stats),
+                    }
+                key = candidate["set_name"]
+                previous = best_by_set.get(key)
+                if previous is None or candidate["score"] > previous["score"]:
+                    best_by_set[key] = candidate
+            prepared[slot] = sorted(best_by_set.values(), key=lambda item: item["score"], reverse=True)
+        return prepared
+
+    def _prepared_empty_candidate(self) -> dict[str, Any]:
+        return {"set_name": None, "disk": None, "score": 0.0}
+
+    def _advance_set_state(self, state: tuple[tuple[str, int], ...], set_name: str | None) -> tuple[tuple[str, int], ...]:
+        if not set_name:
+            return state
+        counts = dict(state)
+        counts[set_name] = min(6, counts.get(set_name, 0) + 1)
+        return tuple(sorted(counts.items()))
 
     def _match_type(self, set_counts: Counter[str], target_set_4: str, target_set_2: str) -> str:
         has_distinct_targets = bool(target_set_4 and target_set_2 and target_set_4 != target_set_2)
@@ -289,7 +369,7 @@ class DiskOptimizer:
         sub_weights = sorted((weight for weight in weights if weight > 0), reverse=True)[:4]
         if not sub_weights:
             return 0.0
-        return sub_weights[0] * (MAX_SUB_STAT_ROLLS - len(sub_weights) + 1) + sum(sub_weights[1:])
+        return sum(sub_weights) + MAX_SUB_STAT_UPGRADES * sub_weights[0]
 
     def _sub_stat_count(self, stat: Any) -> int:
         if not isinstance(stat, dict):

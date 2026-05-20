@@ -123,10 +123,10 @@ def test_score_disk_weights_main_stat_double_and_adds_sub_stats():
         {4: ["crit"]},
     )
 
-    assert score == 23.3908
+    assert score == 33.3607
 
 
-def test_score_disk_balances_each_slot_to_55_points():
+def test_score_disk_balances_each_slot_to_55_points_with_five_sub_stat_upgrades():
     build = {
         "weights": {"crit": 1.0, "crit_dmg": 1.0, "atk_pct": 0.75, "atk": 0.25, "pen": 0.25},
         "preferred_main_stats": {"4": ["crit", "crit_dmg"], "5": ["atk_pct"], "6": ["atk_pct"]},

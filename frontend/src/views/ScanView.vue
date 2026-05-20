@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { diskIconFor } from '../diskIcons';
 
 const DISK_PLACEHOLDER_ASSET = '';
@@ -83,6 +83,13 @@ const selectedScanDisks = ref([]);
 const lastError = ref('');
 const metadata = ref(DEFAULT_METADATA);
 const characterBuilds = ref({});
+const discardAnalysis = ref({});
+const discardOptions = ref({
+  top_rank_limit: 10,
+  potential_score_threshold: 12,
+  min_effective_sub_stats: 2,
+  high_weight_threshold: 0.8,
+});
 const currentPage = ref(1);
 const pageSize = 12;
 const historyPage = ref(1);
@@ -92,6 +99,7 @@ const filters = ref({
   rarity: '',
   slot: '',
   stat: '',
+  discard: '',
 });
 
 const currentSummary = computed(() => {
@@ -115,6 +123,9 @@ const filteredDisks = computed(() => {
     if (filters.value.rarity && rarityOf(disk) !== filters.value.rarity) return false;
     if (filters.value.slot && String(disk?.slot || '') !== filters.value.slot) return false;
     if (filters.value.stat && !diskHasStat(disk, filters.value.stat)) return false;
+    const discard = discardEntryOf(disk);
+    if (filters.value.discard === 'discard' && !discard?.discard_candidate) return false;
+    if (filters.value.discard === 'keep' && discard?.discard_candidate) return false;
     return true;
   });
 });
@@ -144,6 +155,16 @@ const diskTypeOptions = computed(() => {
   visibleDisks.value.forEach((disk) => values.add(setNameOf(disk)));
   return [...values].filter(Boolean).sort((a, b) => a.localeCompare(b, 'zh-CN'));
 });
+
+const discardStats = computed(() => {
+  const items = Object.values(discardAnalysis.value || {});
+  return {
+    discardable: items.filter((item) => item?.discard_candidate).length,
+    keep: items.filter((item) => item && !item.discard_candidate).length,
+  };
+});
+
+watch([selectedScan, currentDisks, selectedScanDisks, discardOptions], refreshDiscardAnalysis, { deep: true });
 
 function getApi() {
   return window?.pywebview?.api || null;
@@ -231,6 +252,18 @@ function diskIdOf(disk, index) {
   return disk?.id || disk?.disk_id || `${disk?.name || 'disk'}-${index}`;
 }
 
+function diskKeyOf(disk) {
+  if (disk?.id || disk?.disk_id) return String(disk.id || disk.disk_id);
+  const pos = disk?.inventory_pos || {};
+  return [
+    setNameOf(disk),
+    disk?.slot || '',
+    statName(disk?.main_stat || disk?.main),
+    pos.row ?? pos.r ?? '',
+    pos.column ?? pos.col ?? pos.c ?? '',
+  ].join('|');
+}
+
 function inventoryLabel(pos) {
   if (!pos) return '第 - 行 / 第 - 个';
   const row = pos.row ?? pos.r ?? pos[1] ?? '-';
@@ -289,8 +322,29 @@ function diskHasStat(disk, stat) {
 }
 
 function resetFilters() {
-  filters.value = { diskType: '', rarity: '', slot: '', stat: '' };
+  filters.value = { diskType: '', rarity: '', slot: '', stat: '', discard: '' };
   currentPage.value = 1;
+}
+
+function discardEntryOf(disk) {
+  return discardAnalysis.value?.[diskKeyOf(disk)] || null;
+}
+
+function isDiscardCandidate(disk) {
+  return Boolean(discardEntryOf(disk)?.discard_candidate);
+}
+
+function discardTitle(disk) {
+  const entry = discardEntryOf(disk);
+  if (!entry) return '尚未完成弃置分析。';
+  return (entry.reasons || []).join('\n') || '暂无弃置分析原因。';
+}
+
+function discardSummary(disk) {
+  const entry = discardEntryOf(disk);
+  if (!entry) return '弃置分析等待中';
+  if (!entry.matching_characters?.length) return '未命中目标套装';
+  return `最佳排名 ${entry.best_rank ?? '-'} / 培养 ${entry.best_potential_score ?? 0} / 命中 ${entry.best_effective_sub_stat_count ?? 0}`;
 }
 
 function changePage(delta) {
@@ -350,6 +404,20 @@ async function mockApi(name, scanId) {
   if (name === 'get_scan_result') return { scan_id: scanId, disks: fallbackDisks };
   if (name === 'delete_scan_result') return { ok: true };
   if (name === 'use_scan_result') return { disks: fallbackDisks };
+  if (name === 'get_discard_analysis') {
+    return {
+      items: (Array.isArray(scanId) ? scanId : fallbackDisks).map((disk, index) => ({
+        disk_index: index,
+        disk_id: disk?.id || '',
+        discard_candidate: false,
+        matching_characters: [],
+        best_rank: null,
+        best_potential_score: 0,
+        best_effective_sub_stat_count: 0,
+        reasons: ['演示模式未连接后端，暂不生成可弃置标记。'],
+      })),
+    };
+  }
   if (name === 'locate_disk') {
     return {
       supported: false,
@@ -386,6 +454,7 @@ async function handleComplete(event) {
     }
 
     await refreshCurrentDisks();
+    await refreshDiscardAnalysis();
     await refreshHistory();
   } catch (error) {
     handleError({ detail: { message: errorMessageOf(error) } });
@@ -427,6 +496,13 @@ async function refreshCurrentDisks() {
   }
 }
 
+async function returnToCurrentDisks() {
+  selectedScan.value = null;
+  selectedScanDisks.value = [];
+  currentPage.value = 1;
+  await refreshDiscardAnalysis();
+}
+
 async function refreshMetadata() {
   try {
     metadata.value = { ...DEFAULT_METADATA, ...(await callApi('get_disk_metadata')) };
@@ -441,6 +517,22 @@ async function refreshCharacterBuilds() {
   } catch (error) {
     characterBuilds.value = { 默认角色: { weights: DEFAULT_WEIGHTS } };
     addLog(`读取角色权重失败：${errorMessageOf(error)}`);
+  }
+}
+
+async function refreshDiscardAnalysis() {
+  try {
+    const result = await callApi('get_discard_analysis', visibleDisks.value, discardOptions.value);
+    const items = Array.isArray(result?.items) ? result.items : [];
+    const next = {};
+    items.forEach((item, index) => {
+      const disk = visibleDisks.value[index];
+      if (disk) next[diskKeyOf(disk)] = item;
+    });
+    discardAnalysis.value = next;
+  } catch (error) {
+    discardAnalysis.value = {};
+    addLog(`弃置分析失败：${errorMessageOf(error)}`);
   }
 }
 
@@ -464,6 +556,7 @@ async function loadScanResult(item) {
     currentPage.value = 1;
     const result = await callApi('get_scan_result', scanId);
     selectedScanDisks.value = normalizeDisks(result);
+    await refreshDiscardAnalysis();
     addLog(`载入历史 ${scanId}。`);
   } catch (error) {
     lastError.value = errorMessageOf(error);
@@ -510,6 +603,7 @@ async function useScanResult(item) {
     selectedScan.value = null;
     selectedScanDisks.value = [];
     currentPage.value = 1;
+    await refreshDiscardAnalysis();
     addLog(`已将历史 ${scanId} 设为当前盘池。`);
   } catch (error) {
     lastError.value = errorMessageOf(error);
@@ -534,6 +628,7 @@ onMounted(async () => {
   window.addEventListener('maa-error', handleError);
   await waitForApi();
   await Promise.all([refreshCurrentDisks(), refreshHistory(), refreshMetadata(), refreshCharacterBuilds()]);
+  await refreshDiscardAnalysis();
   addLog(getApi() ? '后端已连接。' : '后端未连接，页面使用演示数据。');
 });
 
@@ -627,11 +722,11 @@ onBeforeUnmount(() => {
         <div class="panel-title flex items-center justify-between gap-3">
           <span>{{ selectedScan ? '历史详情' : '驱动盘列表' }}</span>
           <span class="text-zinc-400">{{ filteredDisks.length }} / {{ visibleDisks.length }} 枚</span>
-          <button v-if="selectedScan" class="hard-button py-1" type="button" @click="selectedScan = null; selectedScanDisks = []">
+          <button v-if="selectedScan" class="hard-button py-1" type="button" @click="returnToCurrentDisks">
             返回当前
           </button>
         </div>
-        <div class="grid gap-3 border-b-4 border-zinc-800 p-4 md:grid-cols-5">
+        <div class="grid gap-3 border-b-4 border-zinc-800 p-4 md:grid-cols-6">
           <label class="block">
             <span class="field-label">驱动盘类型</span>
             <select v-model="filters.diskType" class="hard-input mt-2 w-full">
@@ -660,8 +755,39 @@ onBeforeUnmount(() => {
               <option v-for="item in statOptions" :key="item" :value="item">{{ item }}</option>
             </select>
           </label>
+          <label class="block">
+            <span class="field-label">弃置标记</span>
+            <select v-model="filters.discard" class="hard-input mt-2 w-full">
+              <option value="">全部</option>
+              <option value="discard">可弃置</option>
+              <option value="keep">保留</option>
+            </select>
+          </label>
           <div class="flex items-end">
             <button class="hard-button w-full" type="button" @click="resetFilters">重置筛选</button>
+          </div>
+        </div>
+        <div class="grid gap-3 border-b-4 border-zinc-800 p-4 md:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
+          <label class="block">
+            <span class="field-label">排名阈值</span>
+            <input v-model.number="discardOptions.top_rank_limit" class="hard-input mt-2 w-full" min="1" step="1" type="number" />
+          </label>
+          <label class="block">
+            <span class="field-label">培养价值低于</span>
+            <input v-model.number="discardOptions.potential_score_threshold" class="hard-input mt-2 w-full" min="0" step="1" type="number" />
+          </label>
+          <label class="block">
+            <span class="field-label">有效词条少于</span>
+            <input v-model.number="discardOptions.min_effective_sub_stats" class="hard-input mt-2 w-full" min="0" step="1" type="number" />
+          </label>
+          <label class="block">
+            <span class="field-label">高权重阈值</span>
+            <input v-model.number="discardOptions.high_weight_threshold" class="hard-input mt-2 w-full" min="0" step="0.1" type="number" />
+          </label>
+          <div class="flex items-end">
+            <div class="rounded-sm border-2 border-red-500/70 bg-red-950/30 px-3 py-2 font-mono text-[11px] font-black text-red-100" title="套装命中角色目标，且所有命中角色均未进前 N，再叠加培养价值或有效词条条件。">
+              可弃置 {{ discardStats.discardable }}
+            </div>
           </div>
         </div>
         <div
@@ -679,7 +805,7 @@ onBeforeUnmount(() => {
             v-for="(disk, index) in pagedDisks"
             :key="diskIdOf(disk, index)"
             class="group rounded-sm border-4 bg-zinc-950 p-3 transition duration-100 hover:-translate-y-1"
-            :class="rarityClass(disk)"
+            :class="[rarityClass(disk), isDiscardCandidate(disk) ? 'discard-card' : '']"
           >
             <div class="flex gap-3">
               <div class="h-20 w-20 shrink-0 rounded-sm border-4 border-zinc-800" :style="placeholderStyle(disk)"></div>
@@ -693,6 +819,9 @@ onBeforeUnmount(() => {
                     {{ rarityOf(disk) }}
                   </span>
                 </div>
+                <div v-if="isDiscardCandidate(disk)" class="mt-2">
+                  <span class="discard-badge" :title="discardTitle(disk)">可弃置</span>
+                </div>
                 <p class="mt-1 truncate font-mono text-xs font-black text-zinc-300">
                   {{ disk.slot || '-' }} 号位驱动盘
                 </p>
@@ -705,6 +834,9 @@ onBeforeUnmount(() => {
               <span class="text-zinc-500">主词条</span>
               <span class="truncate text-right text-zinc-200">{{ statName(disk.main_stat || disk.main) }} {{ statValue(disk.main_stat || disk.main) }}</span>
             </div>
+            <p class="mt-2 truncate border-t-2 border-zinc-800 pt-2 font-mono text-[11px] font-bold" :class="isDiscardCandidate(disk) ? 'text-red-200' : 'text-zinc-500'" :title="discardTitle(disk)">
+              {{ discardSummary(disk) }}
+            </p>
             <div class="mt-3 border-t-2 border-zinc-800 pt-3">
               <p class="mb-2 font-mono text-xs font-black text-zinc-500">副词条</p>
               <div v-if="subStatsOf(disk).length" class="grid grid-cols-2 gap-2">

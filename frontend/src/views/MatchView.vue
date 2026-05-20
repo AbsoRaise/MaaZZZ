@@ -412,8 +412,10 @@ async function saveBuild() {
       [selectedCharacter.value]: normalizeConfig(saved || config),
     };
     infoText.value = `已保存 ${selectedCharacter.value} 的配装配置。`;
+    emitAppLog('信息', infoText.value);
   } catch (error) {
     errorText.value = errorMessageOf(error);
+    emitAppLog('错误', '保存配装配置失败。', errorMessageOf(error));
   } finally {
     isSaving.value = false;
   }
@@ -429,8 +431,13 @@ async function runOptimize() {
     optimizeResult.value = await callApi('get_optimize_combo', selectedCharacter.value, buildRunConfig());
     hasRunOptimize.value = true;
     collapsed.value.result = false;
+    emitAppLog('事件', `最优组合计算完成：总分 ${optimizeResult.value?.total_score ?? '-'}`, {
+      匹配类型: matchTypeLabel(optimizeResult.value?.match_type),
+      计算日志: optimizeResult.value?.optimize_logs || [],
+    });
   } catch (error) {
     errorText.value = errorMessageOf(error);
+    emitAppLog('错误', '最优组合计算失败。', errorMessageOf(error));
   } finally {
     isOptimizing.value = false;
   }
@@ -451,8 +458,10 @@ async function runPromising() {
     );
     hasRunPromising.value = true;
     collapsed.value.promising = false;
+    emitAppLog('事件', `培养推荐计算完成：${promisingResults.value.length} 条结果。`);
   } catch (error) {
     errorText.value = errorMessageOf(error);
+    emitAppLog('错误', '培养推荐计算失败。', errorMessageOf(error));
   } finally {
     isFindingPromising.value = false;
   }
@@ -463,9 +472,19 @@ async function locateDisk(disk) {
     const result = await callApi('locate_disk', disk);
     const target = result?.target || {};
     infoText.value = `${result?.message || '定位预览已生成'}：${warehouseLabel({ inventory_pos: target })}`;
+    emitAppLog('事件', infoText.value, disk);
   } catch (error) {
     errorText.value = errorMessageOf(error);
+    emitAppLog('错误', '定位驱动盘失败。', errorMessageOf(error));
   }
+}
+
+function emitAppLog(level, message, detail = '') {
+  window.dispatchEvent(
+    new CustomEvent('app-log', {
+      detail: { level, message, detail },
+    }),
+  );
 }
 
 function normalizeRecommendations(payload) {
@@ -499,6 +518,10 @@ function buildMockOptimizeResult(characterName, config) {
     is_fallback: !exact,
     warnings: exact ? [] : ['mock 数据未完全命中目标 4+2，已展示降级组合。'],
     score_breakdown: scoreBreakdown,
+    optimize_logs: [
+      `候选数量: ${JSON.stringify(selected.reduce((acc, item) => ({ ...acc, [item.slot]: (acc[item.slot] || 0) + 1 }), {}))}`,
+      '演示模式未连接后端，实际运行时会显示原始组合数、压缩后候选数、状态数和耗时。',
+    ],
   };
 }
 
@@ -542,6 +565,78 @@ function scoreDisk(item, weights, preferredMainStats = {}) {
   return round(Math.min(55, (subWeight + mainWeight) * (55 / maxWeight)) * rarityMultiplier(item));
 }
 
+function currentWeights() {
+  return normalizeWeights(draftToConfig().weights);
+}
+
+function currentPreferredMainStats() {
+  return normalizePreferredMainStats(draft.value.preferred_main_stats);
+}
+
+function isEffectiveSubStat(sub) {
+  return Number(currentWeights()[statName(sub)] || 0) > 0;
+}
+
+function subStatTitle(sub) {
+  const weight = Number(currentWeights()[statName(sub)] || 0);
+  const count = subStatCount(sub);
+  if (weight <= 0) return '该副词条未配置有效权重，不计入当前得分。';
+  return `有效副词条：${statName(sub)}\n词条次数：1 + ${statUpgradeCount(sub)} = ${count}\n权重：${weight}\n贡献权重：${count} × ${weight} = ${formatNumber(count * weight)}`;
+}
+
+function scoreFormulaTitle(item, displayedScore = null) {
+  const weights = currentWeights();
+  const preferredMainStats = currentPreferredMainStats();
+  const slot = Number(item?.slot || 0);
+  const maxWeight = slotMaxWeight(slot, weights, preferredMainStats);
+  if (!maxWeight) return '当前没有可用于计算的有效属性权重。';
+
+  const subLines = subStatsOf(item).map((sub) => {
+    const name = statName(sub);
+    const count = subStatCount(sub);
+    const weight = Number(weights[name] || 0);
+    return `${name}: ${count} × ${formatNumber(weight)} = ${formatNumber(count * weight)}`;
+  });
+  const subWeight = subStatsOf(item).reduce((sum, sub) => sum + subStatCount(sub) * Number(weights[statName(sub)] || 0), 0);
+  const mainName = statName(item?.main_stat);
+  const wantedMainStats = preferredMainStats?.[slot] || [];
+  const mainUseful = slot >= 4 && slot <= 6 && (!wantedMainStats.length || wantedMainStats.includes(mainName));
+  const mainBaseWeight = Number(weights[mainName] || 0);
+  const mainMultiplier = mainLevelMultiplier(item);
+  const mainWeight = mainUseful ? 3 * mainBaseWeight * mainMultiplier : 0;
+  const rawScore = (subWeight + mainWeight) * (55 / maxWeight);
+  const cappedScore = Math.min(55, rawScore);
+  const rarityRate = rarityMultiplier(item);
+  const finalScore = displayedScore ?? round(cappedScore * rarityRate);
+
+  return [
+    `得分计算：${displayScore(finalScore)}`,
+    `副词条贡献：${formatNumber(subWeight)}`,
+    ...(subLines.length ? subLines : ['无副词条']),
+    `主词条贡献：${formatNumber(mainWeight)}`,
+    slot >= 4 && slot <= 6
+      ? `${mainName}: 3 × ${formatNumber(mainBaseWeight)} × ${formatNumber(mainMultiplier)} = ${formatNumber(mainWeight)}${mainUseful ? '' : '（主属性未命中推荐目标，不计分）'}`
+      : '1-3 号位主词条固定，不参与主词条加权。',
+    `部位满分权重：${formatNumber(maxWeight)}`,
+    '副词条满分按“初始最多 4 条有效副词条 + 5 次升级全部给最高权重词条”估算。',
+    `归一化：(${formatNumber(subWeight)} + ${formatNumber(mainWeight)}) × 55 / ${formatNumber(maxWeight)} = ${formatNumber(rawScore)}`,
+    `品质倍率：${rarityOf(item)} × ${formatNumber(rarityRate)}`,
+    `最终：min(55, ${formatNumber(rawScore)}) × ${formatNumber(rarityRate)} = ${displayScore(finalScore)}`,
+  ].join('\n');
+}
+
+function potentialFormulaTitle(item) {
+  const effectiveCount = subStatsOf(item?.disk).filter((sub) => Number(currentWeights()[statName(sub)] || 0) > 0).length;
+  const highCount = subStatsOf(item?.disk).filter((sub) => Number(currentWeights()[statName(sub)] || 0) >= Number(advisorOptions.value.high_weight_threshold || 0)).length;
+  return [
+    `潜力分：${displayScore(item?.potential_score)}`,
+    `当前分：${displayScore(item?.current_score)}`,
+    `有效副词条：${effectiveCount} × 2`,
+    `高权重副词条：${highCount} × 4`,
+    `最终：min(55, ${displayScore(item?.current_score)} + ${effectiveCount} × 2 + ${highCount} × 4) = ${displayScore(item?.potential_score)}`,
+  ].join('\n');
+}
+
 function slotMaxWeight(slot, weights, preferredMainStats) {
   const positive = Object.entries(weights || {}).filter(([, weight]) => Number(weight) > 0);
   if (!positive.length) return 0;
@@ -559,7 +654,7 @@ function slotMaxWeight(slot, weights, preferredMainStats) {
 function maxSubWeight(weights) {
   const sorted = weights.filter((weight) => weight > 0).sort((a, b) => b - a).slice(0, 4);
   if (!sorted.length) return 0;
-  return sorted[0] * (9 - sorted.length + 1) + sorted.slice(1).reduce((sum, weight) => sum + weight, 0);
+  return sorted.reduce((sum, weight) => sum + weight, 0) + 5 * sorted[0];
 }
 
 function subStatCount(sub) {
@@ -580,6 +675,12 @@ function rarityMultiplier(item) {
 
 function round(value) {
   return Math.round(Number(value || 0) * 10000) / 10000;
+}
+
+function formatNumber(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return '0';
+  return Number.isInteger(number) ? String(number) : number.toFixed(4).replace(/0+$/g, '').replace(/\.$/g, '');
 }
 
 function addWeight() {
@@ -618,12 +719,35 @@ function statValue(statValue) {
   return '-';
 }
 
+function statUpgradeCount(statValue) {
+  if (!statValue || typeof statValue !== 'object') return 0;
+  return Number(statValue.upgrade ?? statValue.upgrade_count ?? 0) || 0;
+}
+
 function subStatsOf(disk) {
   return Array.isArray(disk?.sub_stats) ? disk.sub_stats : [];
 }
 
 function diskId(item, index) {
   return item?.id || item?.disk_id || `${item?.slot || 'disk'}-${index}`;
+}
+
+function rarityOf(disk) {
+  return String(disk?.rarity || disk?.rank || 'S').toUpperCase();
+}
+
+function rarityClass(disk) {
+  const rarity = rarityOf(disk);
+  if (rarity === 'A') return 'disk-rarity-a';
+  if (rarity === 'B') return 'disk-rarity-b';
+  return 'disk-rarity-s';
+}
+
+function levelClass(disk) {
+  const rarity = rarityOf(disk);
+  if (rarity === 'A') return 'text-purple-300';
+  if (rarity === 'B') return 'text-sky-300';
+  return 'text-[#f6ce00]';
 }
 
 function comboItems(result) {
@@ -634,6 +758,12 @@ function comboItems(result) {
 function comboScore(result, index) {
   const breakdown = Array.isArray(result?.score_breakdown) ? result.score_breakdown : [];
   return breakdown[index]?.score ?? 0;
+}
+
+function displayScore(value) {
+  const score = Number(value);
+  if (!Number.isFinite(score)) return '-';
+  return Number.isInteger(score) ? String(score) : score.toFixed(1);
 }
 
 function comboSlotLabel(item, index) {
@@ -888,7 +1018,12 @@ onMounted(async () => {
             </div>
 
             <div class="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-              <article v-for="(item, index) in comboItems(optimizeResult)" :key="diskId(item, index)" class="disk-card" :class="{ 'opacity-70': isEmptyComboSlot(item) }">
+              <article
+                v-for="(item, index) in comboItems(optimizeResult)"
+                :key="diskId(item, index)"
+                class="disk-card"
+                :class="[isEmptyComboSlot(item) ? 'opacity-70' : rarityClass(item)]"
+              >
                 <div v-if="isEmptyComboSlot(item)" class="flex min-h-[180px] flex-col items-center justify-center rounded-sm border-2 border-dashed border-zinc-700 bg-zinc-950 p-4 text-center">
                   <p class="font-mono text-xs font-black text-[#f6ce00]">{{ comboSlotLabel(item, index) }}</p>
                   <h3 class="mt-2 text-base font-black text-zinc-300">留空</h3>
@@ -896,12 +1031,25 @@ onMounted(async () => {
                 </div>
                 <template v-else>
                 <div class="flex gap-3">
-                  <div class="disk-vinyl" :style="diskStyle(item)"></div>
+                  <div class="disk-vinyl h-20 w-20" :style="diskStyle(item)"></div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate font-mono text-xs font-black text-[#f6ce00]">{{ comboSlotLabel(item, index) }}</p>
-                    <h3 class="truncate text-sm font-black">{{ item.set_name || '未知套装' }}</h3>
-                    <p class="mt-1 truncate font-mono text-xs text-zinc-400">主词条：{{ statName(item.main_stat) }} {{ statValue(item.main_stat) }}</p>
-                    <p class="mt-1 font-mono text-xs font-black text-[#f6ce00]">得分：{{ comboScore(optimizeResult, index) }}</p>
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="min-w-0">
+                        <p class="truncate font-mono text-xs font-black text-[#f6ce00]">{{ comboSlotLabel(item, index) }}</p>
+                        <h3 class="truncate text-sm font-black">
+                          {{ item.set_name || '未知套装' }}
+                          <span class="font-mono" :class="levelClass(item)">+{{ item.level ?? item.upgrade_level ?? 0 }}</span>
+                        </h3>
+                      </div>
+                      <div class="shrink-0 text-right font-mono text-xs font-black">
+                        <p class="cursor-help text-[#f6ce00]" :title="scoreFormulaTitle(item, comboScore(optimizeResult, index))">
+                          得分 {{ displayScore(comboScore(optimizeResult, index)) }}
+                        </p>
+                        <p :class="levelClass(item)">{{ rarityOf(item) }} 级</p>
+                      </div>
+                    </div>
+                    <p class="mt-1 truncate font-mono text-xs font-black text-zinc-300">{{ item.slot || index + 1 }} 号位驱动盘</p>
+                    <p class="mt-2 truncate font-mono text-xs text-zinc-400">主词条：{{ statName(item.main_stat) }} {{ statValue(item.main_stat) }}</p>
                     <p class="mt-2 font-mono text-[11px] font-bold text-zinc-500">{{ warehouseLabel(item) }}</p>
                   </div>
                 </div>
@@ -911,9 +1059,12 @@ onMounted(async () => {
                     <span
                       v-for="sub in subStatsOf(item)"
                       :key="`${item.id || index}-${statName(sub)}-${statValue(sub)}`"
-                      class="rounded-sm border-2 border-zinc-800 bg-zinc-900 px-2 py-1 font-mono text-[11px] font-black text-zinc-300"
+                      class="rounded-sm border-2 bg-zinc-900 px-2 py-1 font-mono text-[11px] font-black text-zinc-300"
+                      :class="isEffectiveSubStat(sub) ? 'effective-stat-chip' : 'border-zinc-800'"
+                      :title="subStatTitle(sub)"
                     >
                       {{ statName(sub) }} {{ statValue(sub) }}
+                      <span class="text-[#f6ce00]">· +{{ statUpgradeCount(sub) }}</span>
                     </span>
                   </div>
                   <p v-else class="font-mono text-xs font-bold text-zinc-600">暂无副词条</p>
@@ -945,32 +1096,38 @@ onMounted(async () => {
             </div>
 
             <div class="max-h-[720px] space-y-3 overflow-auto pr-1">
-              <article v-for="(item, index) in promisingResults" :key="diskId(item.disk, index)" class="disk-card">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <p class="font-mono text-xs font-black text-[#f6ce00]">{{ rankLabel(item.rank) }}</p>
-                    <h3 class="truncate text-sm font-black">{{ item.disk?.slot }}号位 {{ item.disk?.set_name || '未知套装' }}</h3>
-                  </div>
-                  <div class="shrink-0 text-right font-mono text-xs font-black" :title="scoreTitle()">
-                    <p class="text-[#f6ce00]">潜力 {{ item.potential_score }}</p>
-                    <p class="text-zinc-500">当前 {{ item.current_score }}</p>
-                  </div>
-                </div>
-                <p class="mt-2 font-mono text-[11px] font-bold text-zinc-500" :title="scoreTitle()">{{ scoreLabel(item) }}</p>
-                <div class="mt-3 flex gap-3">
-                  <div class="disk-vinyl h-14 w-14" :style="diskStyle(item.disk)"></div>
-                  <div class="min-w-0 flex-1 font-mono text-xs font-bold text-zinc-300">
-                    <p class="truncate">主词条：{{ statName(item.disk?.main_stat) }} {{ statValue(item.disk?.main_stat) }}</p>
-                    <p class="truncate">仓库：{{ warehouseLabel(item.disk) }}</p>
+              <article v-for="(item, index) in promisingResults" :key="diskId(item.disk, index)" class="disk-card" :class="rarityClass(item.disk)">
+                <div class="flex gap-3">
+                  <div class="disk-vinyl h-20 w-20" :style="diskStyle(item.disk)"></div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="min-w-0">
+                        <p class="truncate font-mono text-xs font-black text-[#f6ce00]">{{ rankLabel(item.rank) }}</p>
+                        <h3 class="truncate text-sm font-black">
+                          {{ item.disk?.set_name || '未知套装' }}
+                          <span class="font-mono" :class="levelClass(item.disk)">+{{ item.disk?.level ?? item.disk?.upgrade_level ?? 0 }}</span>
+                        </h3>
+                      </div>
+                      <div class="shrink-0 text-right font-mono text-xs font-black">
+                        <p class="cursor-help text-[#f6ce00]" :title="potentialFormulaTitle(item)">潜力 {{ displayScore(item.potential_score) }}</p>
+                        <p class="cursor-help text-zinc-500" :title="scoreFormulaTitle(item.disk, item.current_score)">当前 {{ displayScore(item.current_score) }}</p>
+                      </div>
+                    </div>
+                    <p class="mt-1 truncate font-mono text-xs font-black text-zinc-300">{{ item.disk?.slot || '-' }} 号位驱动盘</p>
+                    <p class="mt-2 truncate font-mono text-xs text-zinc-400">主词条：{{ statName(item.disk?.main_stat) }} {{ statValue(item.disk?.main_stat) }}</p>
+                    <p class="mt-2 font-mono text-[11px] font-bold text-zinc-500">仓库：{{ warehouseLabel(item.disk) }}</p>
                   </div>
                 </div>
                 <div class="mt-3 grid grid-cols-2 gap-2">
                   <span
                     v-for="sub in subStatsOf(item.disk)"
                     :key="`${item.disk?.id || index}-${statName(sub)}-${statValue(sub)}`"
-                    class="rounded-sm border-2 border-zinc-800 bg-zinc-900 px-2 py-1 font-mono text-[11px] font-black text-zinc-300"
+                    class="rounded-sm border-2 bg-zinc-900 px-2 py-1 font-mono text-[11px] font-black text-zinc-300"
+                    :class="isEffectiveSubStat(sub) ? 'effective-stat-chip' : 'border-zinc-800'"
+                    :title="subStatTitle(sub)"
                   >
                     {{ statName(sub) }} {{ statValue(sub) }}
+                    <span class="text-[#f6ce00]">· +{{ statUpgradeCount(sub) }}</span>
                   </span>
                 </div>
                 <div class="mt-3 flex flex-wrap gap-2">

@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import CharacterBuildView from './views/CharacterBuildView.vue';
 import LogView from './views/LogView.vue';
 import MatchView from './views/MatchView.vue';
 import ScanView from './views/ScanView.vue';
@@ -41,7 +42,7 @@ function refreshEnvironment() {
   const api = window?.pywebview?.api;
   environment.value = {
     后端桥接: api ? '已连接' : '未连接',
-    当前页面: activeTab.value === 'scan' ? '扫描' : activeTab.value === 'match' ? '配装' : '日志',
+    当前页面: activeTab.value === 'scan' ? '扫描' : activeTab.value === 'match' ? '配装' : activeTab.value === 'characters' ? '角色' : '日志',
     页面地址: window.location.href,
     浏览器内核: navigator.userAgent,
     语言: navigator.language || '未知',
@@ -68,6 +69,11 @@ function handleMaaError(event) {
   addLog('错误', event?.detail?.error || event?.detail?.message || '扫描任务出错。', event?.detail);
 }
 
+function handleAppLog(event) {
+  const detail = event?.detail || {};
+  addLog(detail.level || '信息', detail.message || '收到运行日志。', detail.detail);
+}
+
 function openLogs() {
   activeTab.value = 'logs';
   refreshEnvironment();
@@ -77,6 +83,7 @@ onMounted(() => {
   window.addEventListener('maa-progress', handleMaaProgress);
   window.addEventListener('maa-complete', handleMaaComplete);
   window.addEventListener('maa-error', handleMaaError);
+  window.addEventListener('app-log', handleAppLog);
   window.addEventListener('resize', refreshEnvironment);
   refreshEnvironment();
   addLog('信息', '前端界面已启动。');
@@ -86,6 +93,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('maa-progress', handleMaaProgress);
   window.removeEventListener('maa-complete', handleMaaComplete);
   window.removeEventListener('maa-error', handleMaaError);
+  window.removeEventListener('app-log', handleAppLog);
   window.removeEventListener('resize', refreshEnvironment);
 });
 </script>
@@ -98,7 +106,7 @@ onBeforeUnmount(() => {
           <p class="font-mono text-xs font-black tracking-widest text-[#f6ce00]">绝区零驱动盘助手</p>
           <h1 class="break-words font-display text-2xl font-black leading-tight">驱动盘作战控制台</h1>
         </button>
-        <nav class="grid grid-cols-3 gap-2 sm:flex sm:shrink-0">
+        <nav class="grid grid-cols-4 gap-2 sm:flex sm:shrink-0">
           <button
             class="hard-button"
             :class="{ 'hard-button-active': activeTab === 'scan' }"
@@ -117,6 +125,14 @@ onBeforeUnmount(() => {
           </button>
           <button
             class="hard-button"
+            :class="{ 'hard-button-active': activeTab === 'characters' }"
+            type="button"
+            @click="activeTab = 'characters'"
+          >
+            角色
+          </button>
+          <button
+            class="hard-button"
             :class="{ 'hard-button-active': activeTab === 'logs' }"
             type="button"
             @click="activeTab = 'logs'; refreshEnvironment()"
@@ -130,6 +146,7 @@ onBeforeUnmount(() => {
     <main>
       <ScanView v-if="activeTab === 'scan'" />
       <MatchView v-else-if="activeTab === 'match'" />
+      <CharacterBuildView v-else-if="activeTab === 'characters'" />
       <LogView v-else :logs="visibleLogs" :environment="environment" @clear="clearLogs" @refresh="refreshEnvironment" />
     </main>
   </div>
