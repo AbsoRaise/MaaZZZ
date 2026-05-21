@@ -132,6 +132,7 @@ const advisorOptions = ref({
 });
 const optimizeResult = ref(null);
 const promisingResults = ref([]);
+const promisingSlot = ref(1);
 const hasRunOptimize = ref(false);
 const hasRunPromising = ref(false);
 const collapsed = ref({
@@ -145,6 +146,27 @@ const collapsed = ref({
 const characterNames = computed(() => Object.keys(builds.value));
 const selectedBuild = computed(() => builds.value[selectedCharacter.value] || null);
 const canRun = computed(() => Boolean(selectedCharacter.value) && currentDisks.value.length > 0);
+const promisingSlotGroups = computed(() => {
+  return [1, 2, 3, 4, 5, 6]
+    .map((slot) => {
+      const items = promisingResults.value
+        .filter((item) => Number(item?.disk?.slot || 0) === slot)
+        .sort((a, b) => {
+          const scoreDelta = Number(b?.potential_score || 0) - Number(a?.potential_score || 0);
+          if (scoreDelta) return scoreDelta;
+          return Number(b?.current_score || 0) - Number(a?.current_score || 0);
+        });
+      return { slot, items };
+    })
+    .filter((group) => group.items.length);
+});
+const activePromisingGroup = computed(() => {
+  return (
+    promisingSlotGroups.value.find((group) => group.slot === promisingSlot.value) ||
+    promisingSlotGroups.value[0] ||
+    { slot: promisingSlot.value, items: [] }
+  );
+});
 const currentSetNames = computed(() => {
   const names = new Set();
   currentDisks.value.forEach((item) => {
@@ -174,8 +196,20 @@ watch(selectedCharacter, (name) => {
   loadDraftFromBuild(builds.value[name]);
   optimizeResult.value = null;
   promisingResults.value = [];
+  promisingSlot.value = 1;
   hasRunOptimize.value = false;
   hasRunPromising.value = false;
+});
+
+watch(promisingResults, () => {
+  const availableSlots = promisingSlotGroups.value.map((group) => group.slot);
+  if (!availableSlots.length) {
+    promisingSlot.value = 1;
+    return;
+  }
+  if (!availableSlots.includes(promisingSlot.value)) {
+    promisingSlot.value = availableSlots[0];
+  }
 });
 
 function createEmptyDraft() {
@@ -458,6 +492,10 @@ async function runPromising() {
     );
     hasRunPromising.value = true;
     collapsed.value.promising = false;
+    const firstSlot = [1, 2, 3, 4, 5, 6].find((slot) =>
+      promisingResults.value.some((item) => Number(item?.disk?.slot || 0) === slot),
+    );
+    promisingSlot.value = firstSlot || 1;
     emitAppLog('事件', `培养推荐计算完成：${promisingResults.value.length} 条结果。`);
   } catch (error) {
     errorText.value = errorMessageOf(error);
@@ -528,27 +566,60 @@ function buildMockOptimizeResult(characterName, config) {
 function buildMockPromisingResults() {
   const weights = normalizeWeights(selectedBuild.value?.weights);
   const preferredMainStats = normalizePreferredMainStats(selectedBuild.value?.preferred_main_stats);
+  const recommendedSets = recommendedSetNames(draftToConfig().preferred_sets || selectedBuild.value?.preferred_sets);
   return mockDisks
-    .filter((item) => Number(item.level || 0) < 15)
+    .filter((item) => !recommendedSets.length || recommendedSets.includes(item.set_name || item.set))
     .slice(0, 5)
     .map((item) => {
       const currentScore = scoreDisk(item, weights, preferredMainStats);
       const effectiveCount = (item.sub_stats || []).filter((sub) => (weights[statName(sub)] || 0) > 0).length;
       const highCount = (item.sub_stats || []).filter((sub) => (weights[statName(sub)] || 0) >= Number(advisorOptions.value.high_weight_threshold || 0)).length;
-      const potentialScore = round(Math.min(55, currentScore + effectiveCount * 2 + highCount * 4));
+      const effectiveRollCount = (item.sub_stats || []).reduce((sum, sub) => sum + ((weights[statName(sub)] || 0) > 0 ? subStatCount(sub) : 0), 0);
+      const highRollCount = (item.sub_stats || []).reduce((sum, sub) => sum + ((weights[statName(sub)] || 0) >= Number(advisorOptions.value.high_weight_threshold || 0) ? subStatCount(sub) : 0), 0);
+      const weightedRollScore = weightedSubStatRollScore(item, weights);
+      const maxStatWeight = maxWeightOf(weights);
+      const remainingUpgradeCount = remainingUpgradeCountFor(item);
+      const maxVisibleRollCount = maxVisibleSubStatRollCountFor(item);
+      const potentialScore = potentialScoreFor(item, weightedRollScore, maxStatWeight, preferredMainStats);
       return {
         disk: item,
         rank: potentialScore >= 25 ? 'high' : potentialScore >= 12 ? 'medium' : 'low',
         potential_score: potentialScore,
         current_score: currentScore,
+        effective_sub_stat_roll_count: effectiveRollCount,
+        high_value_sub_stat_roll_count: highRollCount,
+        weighted_sub_stat_roll_score: round(weightedRollScore),
+        max_stat_weight: maxStatWeight,
+        remaining_upgrade_count: remainingUpgradeCount,
+        max_visible_sub_stat_roll_count: maxVisibleRollCount,
         reasons: [
-          '未满级驱动盘',
+          remainingUpgradeCount > 0 ? '未满级驱动盘' : '已满级驱动盘',
           `包含 ${effectiveCount} 条角色有效副词条`,
           `包含 ${highCount} 条高价值副词条`,
+          `剩余 ${remainingUpgradeCount} 次副词条升级机会`,
+          `当前等级最多已出现 ${maxVisibleRollCount} 次副词条`,
           `仓库位置：${warehouseLabel(item)}`,
         ],
       };
     });
+}
+
+function recommendedSetNames(preferredSets) {
+  if (!preferredSets || typeof preferredSets !== 'object') return [];
+  const names = [preferredSets.target_set_4, preferredSets.target_set_2].filter(Boolean);
+  const alternatives = Array.isArray(preferredSets.alternatives) ? preferredSets.alternatives : [];
+  alternatives.forEach((item) => {
+    if (typeof item === 'string' && item) {
+      names.push(item);
+      return;
+    }
+    if (item && typeof item === 'object') {
+      ['target_set_4', 'target_set_2', 'set_name', 'set'].forEach((key) => {
+        if (item[key]) names.push(item[key]);
+      });
+    }
+  });
+  return [...new Set(names.map((item) => String(item).trim()).filter(Boolean))];
 }
 
 function scoreDisk(item, weights, preferredMainStats = {}) {
@@ -626,14 +697,36 @@ function scoreFormulaTitle(item, displayedScore = null) {
 }
 
 function potentialFormulaTitle(item) {
-  const effectiveCount = subStatsOf(item?.disk).filter((sub) => Number(currentWeights()[statName(sub)] || 0) > 0).length;
-  const highCount = subStatsOf(item?.disk).filter((sub) => Number(currentWeights()[statName(sub)] || 0) >= Number(advisorOptions.value.high_weight_threshold || 0)).length;
+  const weights = currentWeights();
+  const weightedRollScore = Number(item?.weighted_sub_stat_roll_score ?? weightedSubStatRollScore(item?.disk, weights));
+  const maxStatWeight = Number(item?.max_stat_weight ?? maxWeightOf(weights));
+  const remainingUpgradeCount = Number(item?.remaining_upgrade_count ?? remainingUpgradeCountFor(item?.disk));
+  const maxVisibleRollCount = Number(item?.max_visible_sub_stat_roll_count ?? maxVisibleSubStatRollCountFor(item?.disk));
+  const visibleQuality = maxStatWeight > 0 ? (weightedRollScore * 6) / maxStatWeight : 0;
+  const qualityPerVisibleRoll = maxVisibleRollCount > 0 ? visibleQuality / maxVisibleRollCount : 0;
+  const mainFactor = mainStatFactorFor(item?.disk);
+  const statLines = subStatsOf(item?.disk)
+    .map((sub) => {
+      const name = statName(sub);
+      const count = subStatCount(sub);
+      const weight = Number(weights[name] || 0);
+      if (weight <= 0) return null;
+      return `${name}: ${count} × ${formatNumber(weight)} = ${formatNumber(count * weight)}`;
+    })
+    .filter(Boolean);
   return [
     `潜力分：${displayScore(item?.potential_score)}`,
     `当前分：${displayScore(item?.current_score)}`,
-    `有效副词条：${effectiveCount} × 2`,
-    `高权重副词条：${highCount} × 4`,
-    `最终：min(55, ${displayScore(item?.current_score)} + ${effectiveCount} × 2 + ${highCount} × 4) = ${displayScore(item?.potential_score)}`,
+    `当前等级最多已出现：${maxVisibleRollCount} 次副词条`,
+    `剩余升级次数：${remainingUpgradeCount} 次`,
+    `加权词条贡献：${formatNumber(weightedRollScore)}`,
+    ...(statLines.length ? statLines : ['没有命中有效副词条']),
+    `权重归一：${formatNumber(weightedRollScore)} × 6 / ${formatNumber(maxStatWeight)} = ${formatNumber(visibleQuality)}`,
+    `可见平均质量：${formatNumber(visibleQuality)} / ${maxVisibleRollCount} = ${formatNumber(qualityPerVisibleRoll)}`,
+    `主属性系数：${formatNumber(mainFactor)}`,
+    remainingUpgradeCount <= 0
+      ? '最终：15级驱动盘没有剩余升级机会，潜力分 = 0'
+      : `最终：min(55, ${formatNumber(qualityPerVisibleRoll)} × ${remainingUpgradeCount}) × ${formatNumber(mainFactor)} = ${displayScore(item?.potential_score)}`,
   ].join('\n');
 }
 
@@ -664,6 +757,49 @@ function subStatCount(sub) {
 function mainLevelMultiplier(item) {
   const level = Math.max(0, Number(item?.level || 0));
   return Math.max(0.25, Math.min(1, 0.25 + level * 0.05));
+}
+
+function remainingUpgradeCountFor(item) {
+  const level = Math.max(0, Number(item?.level || 0));
+  if (level >= 15) return 0;
+  if (level >= 12) return 1;
+  if (level >= 9) return 2;
+  if (level >= 6) return 3;
+  if (level >= 3) return 4;
+  return 5;
+}
+
+function maxVisibleSubStatRollCountFor(item) {
+  return 9 - remainingUpgradeCountFor(item);
+}
+
+function maxWeightOf(weights) {
+  const values = Object.values(weights || {}).map((value) => Number(value) || 0).filter((value) => value > 0);
+  return values.length ? Math.max(...values) : 0;
+}
+
+function weightedSubStatRollScore(item, weights = currentWeights()) {
+  return subStatsOf(item).reduce((sum, sub) => {
+    const weight = Number(weights[statName(sub)] || 0);
+    return weight > 0 ? sum + subStatCount(sub) * weight : sum;
+  }, 0);
+}
+
+function mainStatFactorFor(item, preferredMainStats = currentPreferredMainStats()) {
+  const slot = Number(item?.slot || 0);
+  if (slot < 4 || slot > 6) return 1;
+  const wantedMainStats = preferredMainStats?.[slot] || [];
+  if (!wantedMainStats.length) return 1;
+  return wantedMainStats.includes(statName(item?.main_stat)) ? 1 : 0.5;
+}
+
+function potentialScoreFor(item, weightedRollScore, maxStatWeight, preferredMainStats = currentPreferredMainStats()) {
+  const remainingUpgradeCount = remainingUpgradeCountFor(item);
+  if (remainingUpgradeCount <= 0 || maxStatWeight <= 0) return 0;
+  const maxVisibleRollCount = maxVisibleSubStatRollCountFor(item);
+  const visibleQuality = (weightedRollScore * 6) / maxStatWeight;
+  const qualityPerVisibleRoll = maxVisibleRollCount > 0 ? visibleQuality / maxVisibleRollCount : 0;
+  return round(Math.min(55, qualityPerVisibleRoll * remainingUpgradeCount) * mainStatFactorFor(item, preferredMainStats));
 }
 
 function rarityMultiplier(item) {
@@ -834,7 +970,7 @@ function scoreLabel(item) {
 }
 
 function scoreTitle() {
-  return '潜力分表示按当前配置估算的培养后收益；当前分表示这块驱动盘现在按属性权重计算出的得分。';
+  return '潜力分表示这块驱动盘未来剩余升级机会的培养价值；当前分表示这块驱动盘现在按属性权重计算出的得分。';
 }
 
 function diskStyle(item) {
@@ -1045,7 +1181,6 @@ onMounted(async () => {
                         <p class="cursor-help text-[#f6ce00]" :title="scoreFormulaTitle(item, comboScore(optimizeResult, index))">
                           得分 {{ displayScore(comboScore(optimizeResult, index)) }}
                         </p>
-                        <p :class="levelClass(item)">{{ rarityOf(item) }} 级</p>
                       </div>
                     </div>
                     <p class="mt-1 truncate font-mono text-xs font-black text-zinc-300">{{ item.slot || index + 1 }} 号位驱动盘</p>
@@ -1095,8 +1230,22 @@ onMounted(async () => {
               </label>
             </div>
 
+            <div class="slot-tabs">
+              <button
+                v-for="slot in [1, 2, 3, 4, 5, 6]"
+                :key="`promising-tab-${slot}`"
+                class="slot-tab"
+                :class="{ 'slot-tab-active': promisingSlot === slot }"
+                type="button"
+                @click="promisingSlot = slot"
+              >
+                <span>{{ slot }} 号位</span>
+                <strong>{{ promisingSlotGroups.find((group) => group.slot === slot)?.items.length || 0 }}</strong>
+              </button>
+            </div>
+
             <div class="max-h-[720px] space-y-3 overflow-auto pr-1">
-              <article v-for="(item, index) in promisingResults" :key="diskId(item.disk, index)" class="disk-card" :class="rarityClass(item.disk)">
+              <article v-for="(item, index) in activePromisingGroup.items" :key="diskId(item.disk, index)" class="disk-card" :class="rarityClass(item.disk)">
                 <div class="flex gap-3">
                   <div class="disk-vinyl h-20 w-20" :style="diskStyle(item.disk)"></div>
                   <div class="min-w-0 flex-1">
@@ -1137,6 +1286,9 @@ onMounted(async () => {
                   定位到游戏中（预留）
                 </button>
               </article>
+              <div v-if="promisingResults.length && !activePromisingGroup.items.length" class="empty-state">
+                当前 {{ promisingSlot }} 号位暂无符合条件的胚子。
+              </div>
               <div v-if="!promisingResults.length" class="empty-state">尚未运行胚子推荐。</div>
             </div>
           </div>

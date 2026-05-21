@@ -34,6 +34,11 @@ def advisor():
                     "5": ["atk"],
                     "6": ["atk"],
                 },
+                "preferred_sets": {
+                    "target_set_4": "Thunder",
+                    "target_set_2": "Wood",
+                    "alternatives": [{"target_set_4": "Polar", "target_set_2": "Swing"}],
+                },
             }
         }
     )
@@ -74,7 +79,7 @@ def test_recommends_underleveled_disks_that_reach_effective_sub_stat_threshold()
     assert results[0]["rank"] in {"high", "medium", "low"}
 
 
-def test_ignores_disks_at_max_cultivation_level():
+def test_max_level_disks_have_zero_potential_score():
     results = advisor().find_promising_disks(
         "Anby",
         {},
@@ -84,7 +89,121 @@ def test_ignores_disks_at_max_cultivation_level():
         ],
     )
 
-    assert ids(results) == ["under"]
+    by_id = {result["disk"]["id"]: result for result in results}
+    assert by_id["maxed"]["potential_score"] == 0
+    assert by_id["maxed"]["remaining_upgrade_count"] == 0
+    assert "剩余 0 次副词条升级机会" in by_id["maxed"]["reasons"]
+
+
+def test_potential_score_decreases_after_each_upgrade_stage():
+    results = advisor().find_promising_disks(
+        "Anby",
+        {},
+        [
+            disk("level0", 4, "crit", 1, [{"name": "atk", "value": 1}], level=0),
+            disk("level3", 4, "crit", 1, [{"name": "atk", "value": 1}], level=3),
+            disk("level6", 4, "crit", 1, [{"name": "atk", "value": 1}], level=6),
+            disk("level9", 4, "crit", 1, [{"name": "atk", "value": 1}], level=9),
+            disk("level12", 4, "crit", 1, [{"name": "atk", "value": 1}], level=12),
+            disk("level15", 4, "crit", 1, [{"name": "atk", "value": 1}], level=15),
+        ],
+    )
+
+    by_id = {result["disk"]["id"]: result for result in results}
+    assert by_id["level0"]["remaining_upgrade_count"] == 5
+    assert by_id["level3"]["remaining_upgrade_count"] == 4
+    assert by_id["level6"]["remaining_upgrade_count"] == 3
+    assert by_id["level9"]["remaining_upgrade_count"] == 2
+    assert by_id["level12"]["remaining_upgrade_count"] == 1
+    assert by_id["level15"]["remaining_upgrade_count"] == 0
+    assert by_id["level0"]["max_visible_sub_stat_roll_count"] == 4
+    assert by_id["level3"]["max_visible_sub_stat_roll_count"] == 5
+    assert by_id["level6"]["max_visible_sub_stat_roll_count"] == 6
+    assert by_id["level9"]["max_visible_sub_stat_roll_count"] == 7
+    assert by_id["level12"]["max_visible_sub_stat_roll_count"] == 8
+    assert by_id["level15"]["max_visible_sub_stat_roll_count"] == 9
+    assert (
+        by_id["level0"]["potential_score"]
+        > by_id["level3"]["potential_score"]
+        > by_id["level6"]["potential_score"]
+        > by_id["level9"]["potential_score"]
+        > by_id["level12"]["potential_score"]
+        > by_id["level15"]["potential_score"]
+    )
+
+
+def test_potential_uses_visible_roll_density_for_current_level():
+    results = advisor().find_promising_disks(
+        "Anby",
+        {},
+        [
+            disk(
+                "level0-four-good",
+                4,
+                "crit",
+                1,
+                [
+                    {"name": "atk", "value": 1},
+                    {"name": "crit", "value": 1},
+                    {"name": "atk", "value": 1},
+                    {"name": "crit", "value": 1},
+                ],
+                level=0,
+            ),
+            disk(
+                "level12-four-good",
+                4,
+                "crit",
+                1,
+                [
+                    {"name": "atk", "value": 1},
+                    {"name": "crit", "value": 1},
+                    {"name": "atk", "value": 1},
+                    {"name": "crit", "value": 1},
+                ],
+                level=12,
+            ),
+        ],
+    )
+
+    by_id = {result["disk"]["id"]: result for result in results}
+    assert by_id["level0-four-good"]["effective_sub_stat_roll_count"] == 4
+    assert by_id["level0-four-good"]["max_visible_sub_stat_roll_count"] == 4
+    assert by_id["level12-four-good"]["max_visible_sub_stat_roll_count"] == 8
+    assert (
+        by_id["level0-four-good"]["potential_score"]
+        > by_id["level12-four-good"]["potential_score"]
+    )
+
+
+def test_potential_score_scales_with_stat_weight():
+    results = advisor().find_promising_disks(
+        "Anby",
+        {},
+        [
+            disk("lower-weight", 1, "hp", 1, [{"name": "atk", "value": 1}], level=0),
+            disk("higher-weight", 1, "hp", 1, [{"name": "crit", "value": 1}], level=0),
+        ],
+    )
+
+    by_id = {result["disk"]["id"]: result for result in results}
+    assert by_id["higher-weight"]["weighted_sub_stat_roll_score"] > by_id["lower-weight"]["weighted_sub_stat_roll_score"]
+    assert by_id["higher-weight"]["potential_score"] > by_id["lower-weight"]["potential_score"]
+
+
+def test_promising_disks_are_limited_to_recommended_sets():
+    results = advisor().find_promising_disks(
+        "Anby",
+        {},
+        [
+            disk("target-4", 1, "hp", 1, [{"name": "crit", "value": 1}]) | {"set_name": "Thunder"},
+            disk("target-2", 1, "hp", 1, [{"name": "crit", "value": 1}]) | {"set_name": "Wood"},
+            disk("alternative", 1, "hp", 1, [{"name": "crit", "value": 1}]) | {"set_name": "Polar"},
+            disk("off-set", 1, "hp", 1, [{"name": "crit", "value": 1}]) | {"set_name": "Inferno"},
+        ],
+    )
+
+    assert set(ids(results)) == {"target-4", "target-2", "alternative"}
 
 
 def test_slots_four_five_six_mark_main_stat_matches_and_explain_bonus():
@@ -184,20 +303,19 @@ def test_options_for_effective_sub_stats_and_high_weight_threshold_take_effect()
     assert "包含 1 条高价值副词条" in results[0]["reasons"]
 
 
-def test_results_are_sorted_by_potential_score_descending():
+def test_results_are_grouped_by_slot_then_sorted_by_potential_score_descending():
     results = advisor().find_promising_disks(
         "Anby",
         {},
         [
-            disk("low", 4, "crit", 1, [{"name": "atk", "value": 1}]),
-            disk("high", 5, "atk", 1, [{"name": "crit", "value": 5}]),
-            disk("mid", 6, "atk", 1, [{"name": "crit", "value": 2}]),
+            disk("slot2-low", 2, "def", 1, [{"name": "atk", "value": 1}]),
+            disk("slot1-high", 1, "hp", 1, [{"name": "crit", "value": 5}]),
+            disk("slot1-low", 1, "hp", 1, [{"name": "atk", "value": 1}]),
+            disk("slot2-high", 2, "def", 1, [{"name": "crit", "value": 5}]),
         ],
     )
 
-    scores = [result["potential_score"] for result in results]
-    assert scores == sorted(scores, reverse=True)
-    assert ids(results) == ["high", "mid", "low"]
+    assert ids(results) == ["slot1-high", "slot1-low", "slot2-high", "slot2-low"]
 
 
 def test_results_include_warehouse_location_reasons_for_p_r_c():

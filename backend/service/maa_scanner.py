@@ -24,6 +24,11 @@ from backend.service.disk_metadata import DiskMetadataStore
 
 
 ProgressCallback = Callable[[dict[str, Any]], None]
+CancelCallback = Callable[[], bool]
+
+
+class ScanCancelled(RuntimeError):
+    pass
 
 
 class MaaRuntime(Protocol):
@@ -33,7 +38,11 @@ class MaaRuntime(Protocol):
     def run_task(self, entry: str, profile: dict[str, Any]) -> dict[str, Any]:
         ...
 
-    def scan_visible_grid(self, profile: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
+    def scan_visible_grid(
+        self,
+        profile: dict[str, Any],
+        cancel_requested: CancelCallback | None = None,
+    ) -> tuple[list[dict[str, Any]], list[str]]:
         ...
 
 
@@ -121,7 +130,11 @@ class MaaFrameworkRuntime:
             "entry": entry,
         }
 
-    def scan_visible_grid(self, profile: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
+    def scan_visible_grid(
+        self,
+        profile: dict[str, Any],
+        cancel_requested: CancelCallback | None = None,
+    ) -> tuple[list[dict[str, Any]], list[str]]:
         strategy = _scan_strategy(profile)
         if strategy in {"row_major_template", "template_row_major"}:
             return self._scan_visible_grid_row_major(profile)
@@ -165,6 +178,11 @@ class MaaFrameworkRuntime:
         cached_empty_cells: list[dict[str, Any]] | None = None
         consecutive_unknown_cells = 0
 
+        def check_cancel() -> None:
+            if cancel_requested is not None and cancel_requested():
+                logs.append("用户请求中止扫描")
+                raise ScanCancelled("扫描已中止")
+
         def describe_cell(cell: dict[str, Any] | None) -> str:
             if not cell:
                 return "none"
@@ -175,6 +193,7 @@ class MaaFrameworkRuntime:
             )
 
         def refresh_cells() -> None:
+            check_cancel()
             nonlocal cached_grid_cells, cached_empty_cells
             cached_grid_cells = self._detect_visible_grid_cells(profile, rows, columns)
             cached_empty_cells = self._detect_empty_grid_cells(profile, rows, columns)
@@ -184,6 +203,7 @@ class MaaFrameworkRuntime:
                 logs.append("Maa 模板匹配未识别到可用格子，回退到配置坐标")
 
         def capture_grid_snapshot() -> Any:
+            check_cancel()
             self.controller.post_screencap().wait()
             return _image_roi_copy(self.controller.cached_image, _scale_roi(grid_roi, profile, self.controller.cached_image))
 
@@ -200,6 +220,7 @@ class MaaFrameworkRuntime:
             return "unknown"
 
         def click_and_read(row: int, visual_row: int, column: int, delay: float) -> str:
+            check_cancel()
             nonlocal cached_grid_cells, cached_empty_cells, consecutive_unknown_cells
             if cached_grid_cells is None:
                 refresh_cells()
@@ -236,6 +257,7 @@ class MaaFrameworkRuntime:
                 before_detail = _image_roi_copy(before_image, _scale_roi(detail_roi, profile, before_image))
                 self.controller.post_click(x, y).wait()
                 time.sleep(delay)
+                check_cancel()
                 self.controller.post_screencap().wait()
                 image = self.controller.cached_image
                 scaled_roi = _scale_roi(detail_roi, profile, image)
@@ -283,14 +305,17 @@ class MaaFrameworkRuntime:
             return "disk"
 
         logical_row = 1
+        check_cancel()
         refresh_cells()
         for visual_row in range(1, min(auto_scroll_trigger_row, rows + 1)):
             for column in range(1, columns + 1):
+                check_cancel()
                 if click_and_read(logical_row, visual_row, column, click_delay) == "empty":
                     return disks, logs
             logical_row += 1
 
         while logical_row <= max_scan_rows:
+            check_cancel()
             logs.append(f"点击底行第 {logical_row} 行第 1 个，判断是否继续下滑")
             grid_before_click = capture_grid_snapshot()
             status = click_and_read(logical_row, auto_scroll_trigger_row, 1, auto_scroll_delay)
@@ -301,6 +326,7 @@ class MaaFrameworkRuntime:
                 f"底行第 {logical_row} 行第 1 个点击完成，等待 {auto_scroll_settle_delay:.2f}s 后重新识别当前选中格"
             )
             time.sleep(auto_scroll_settle_delay)
+            check_cancel()
             grid_after_click = capture_grid_snapshot()
             scroll_delta = _mean_abs_image_delta(grid_before_click, grid_after_click)
             selected_cell = self._detect_selected_grid_cell(profile, rows, columns, expected_column=1)
@@ -334,6 +360,7 @@ class MaaFrameworkRuntime:
                     f"expected_row={stable_selected_row}, fallback_row={stable_selected_row}"
                 )
                 time.sleep(selected_retry_delay)
+                check_cancel()
                 selected_cell = self._detect_selected_grid_cell(profile, rows, columns, expected_column=1)
                 selected_row = int(selected_cell.get("row") or 0) if selected_cell else 0
                 selected_summary = describe_cell(selected_cell)
@@ -352,6 +379,7 @@ class MaaFrameworkRuntime:
             )
             refresh_cells()
             for column in range(2, columns + 1):
+                check_cancel()
                 logs.append(
                     f"继续扫描下一列: logical_row={logical_row}, visual_row={continuation_row}, "
                     f"next_column={column}, selected={selected_summary}"
@@ -939,8 +967,12 @@ class MaaScanner:
         write_debug_artifacts(self.debug_dir, {"screenshot_import": result}, [result["message"]])
         return result
 
-    def scan_inventory(self, on_progress: ProgressCallback | None = None) -> tuple[list[dict[str, Any]], list[str]]:
-        return self.run_scan(on_progress)
+    def scan_inventory(
+        self,
+        on_progress: ProgressCallback | None = None,
+        cancel_requested: CancelCallback | None = None,
+    ) -> tuple[list[dict[str, Any]], list[str]]:
+        return self.run_scan(on_progress, cancel_requested)
 
     def scan_current_page(self, page: int = 1) -> list[dict[str, Any]]:
         # 当前返回占位数据；真实接入后这里会遍历当前页网格并读取详情。
@@ -977,11 +1009,19 @@ class MaaScanner:
         }
 
     def run_scan(
-        self, on_progress: ProgressCallback | None = None
+        self,
+        on_progress: ProgressCallback | None = None,
+        cancel_requested: CancelCallback | None = None,
     ) -> tuple[list[dict[str, Any]], list[str]]:
         logs: list[str] = []
 
+        def check_cancel() -> None:
+            if cancel_requested is not None and cancel_requested():
+                logs.append("用户请求中止扫描")
+                raise ScanCancelled("扫描已中止")
+
         def emit(progress: int, message: str) -> None:
+            check_cancel()
             payload = {"progress": progress, "message": message}
             logs.append(message)
             if on_progress is not None:
@@ -990,6 +1030,7 @@ class MaaScanner:
         emit(5, "初始化 Maa 扫描配置")
         self.load_profile()
         emit(20, "检查 MaaFramework 连接状态")
+        check_cancel()
         try:
             self.connect()
         except Exception as exc:
@@ -1000,8 +1041,12 @@ class MaaScanner:
         if self.is_maa_enabled():
             if hasattr(self.runtime, "scan_visible_grid"):
                 emit(35, "遍历当前可见驱动盘并识别详情")
-                disks, scan_logs = self.runtime.scan_visible_grid(self.profile)
+                disks, scan_logs = self.runtime.scan_visible_grid(
+                    self.profile,
+                    cancel_requested=cancel_requested,
+                )
                 logs.extend(scan_logs)
+                check_cancel()
                 output_path = self.resource_root / "output" / "latest_scan.json"
                 write_json(output_path, {"disks": disks})
                 result = {"disk_count": len(disks), "disks": disks}
@@ -1009,6 +1054,7 @@ class MaaScanner:
                 entry = str(_dict_or_empty(self.profile.get("maa")).get("entry") or "ScanDisks")
                 emit(35, f"执行 MaaFramework 任务：{entry}")
                 task_result = self.runtime.run_task(entry, self.profile)
+                check_cancel()
                 disks = self.read_maa_output()
                 result = {"disk_count": len(disks), "disks": disks, "maa_task": task_result}
             write_debug_artifacts(self.debug_dir, result, logs)
@@ -1019,6 +1065,7 @@ class MaaScanner:
             return disks, logs
 
         emit(45, "扫描当前驱动盘仓库页")
+        check_cancel()
         disks = self.scan_current_page(page=1)
         emit(80, "校验并整理驱动盘识别结果")
         result = {"disk_count": len(disks), "disks": disks}

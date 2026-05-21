@@ -7,6 +7,7 @@ import pytest
 
 from backend.service.maa_scanner import (
     MaaScanner,
+    ScanCancelled,
     _is_confirmed_empty_cell,
     _reached_bottom_after_bottom_click,
     _scan_strategy,
@@ -39,6 +40,13 @@ def test_run_scan_emits_progress_and_writes_debug(temp_dir):
     assert len(disks) == 2
     assert logs[-1] == "Maa 占位扫描完成"
     assert (temp_dir / "debug" / "latest_result.json").exists()
+
+
+def test_run_scan_can_be_cancelled_before_work_starts(temp_dir):
+    scanner = MaaScanner(resource_root=temp_dir / "resources", debug_dir=temp_dir / "debug")
+
+    with pytest.raises(ScanCancelled, match="扫描已中止"):
+        scanner.run_scan(cancel_requested=lambda: True)
 
 
 def test_run_scan_uses_maaframework_runtime_when_enabled(temp_dir):

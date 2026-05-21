@@ -24,17 +24,20 @@ class CultivationAdvisor:
         preferred_main_stats = self.optimizer._preferred_main_stats(
             build.get("preferred_main_stats")
         )
+        recommended_sets = self._recommended_sets(build, options)
         min_effective_sub_stats = self._option(options, "min_effective_sub_stats", 1)
         high_weight_threshold = self._option(options, "high_weight_threshold", 0.8)
 
         recommendations: list[dict[str, Any]] = []
         for disk in all_disks:
-            if not isinstance(disk, dict) or self._level(disk) >= 15:
+            if not isinstance(disk, dict):
+                continue
+            if recommended_sets and self._set_name(disk) not in recommended_sets:
                 continue
 
+            sub_stats = self.optimizer._sub_stats(disk)
             sub_weights = [
-                self.optimizer._weight_for_stat(stat, weights)
-                for stat in self.optimizer._sub_stats(disk)
+                self.optimizer._weight_for_stat(stat, weights) for stat in sub_stats
             ]
             effective_count = sum(1 for weight in sub_weights if weight > 0)
             if effective_count < min_effective_sub_stats:
@@ -43,14 +46,34 @@ class CultivationAdvisor:
             high_value_count = sum(
                 1 for weight in sub_weights if weight >= high_weight_threshold
             )
+            effective_roll_count = sum(
+                self.optimizer._sub_stat_count(stat)
+                for stat, weight in zip(sub_stats, sub_weights)
+                if weight > 0
+            )
+            high_value_roll_count = sum(
+                self.optimizer._sub_stat_count(stat)
+                for stat, weight in zip(sub_stats, sub_weights)
+                if weight >= high_weight_threshold
+            )
+            weighted_roll_score = sum(
+                self.optimizer._sub_stat_count(stat) * weight
+                for stat, weight in zip(sub_stats, sub_weights)
+                if weight > 0
+            )
+            max_stat_weight = self._max_stat_weight(weights)
             current_score = self.optimizer.score_disk(disk, weights, preferred_main_stats)
             main_stat_matched, main_stat_factor, main_stat_bonus, main_reason = (
                 self._main_stat_adjustment(disk, preferred_main_stats)
             )
-            potential_score = round(
-                min(55.0, current_score + effective_count * 2.0 + high_value_count * 4.0)
-                * main_stat_factor,
-                4,
+            remaining_upgrade_count = self._remaining_upgrade_count(disk)
+            max_visible_roll_count = self._max_visible_sub_stat_roll_count(disk)
+            potential_score = self._potential_score(
+                weighted_roll_score,
+                max_stat_weight,
+                main_stat_factor,
+                remaining_upgrade_count,
+                max_visible_roll_count,
             )
             reasons = self._reasons(
                 disk,
@@ -58,6 +81,8 @@ class CultivationAdvisor:
                 high_value_count,
                 main_reason,
                 main_stat_bonus,
+                remaining_upgrade_count,
+                max_visible_roll_count,
             )
             recommendations.append(
                 {
@@ -67,6 +92,12 @@ class CultivationAdvisor:
                     "rank": self._rank(potential_score),
                     "effective_sub_stat_count": effective_count,
                     "high_value_sub_stat_count": high_value_count,
+                    "effective_sub_stat_roll_count": effective_roll_count,
+                    "high_value_sub_stat_roll_count": high_value_roll_count,
+                    "weighted_sub_stat_roll_score": round(weighted_roll_score, 4),
+                    "max_stat_weight": max_stat_weight,
+                    "remaining_upgrade_count": remaining_upgrade_count,
+                    "max_visible_sub_stat_roll_count": max_visible_roll_count,
                     "main_stat_matched": main_stat_matched,
                     "reasons": reasons,
                 }
@@ -74,8 +105,11 @@ class CultivationAdvisor:
 
         return sorted(
             recommendations,
-            key=lambda item: (item["potential_score"], item["current_score"]),
-            reverse=True,
+            key=lambda item: (
+                self._slot(item.get("disk")),
+                -float(item["potential_score"]),
+                -float(item["current_score"]),
+            ),
         )
 
     def _main_stat_adjustment(
@@ -102,11 +136,15 @@ class CultivationAdvisor:
         high_value_count: int,
         main_reason: str | None,
         main_stat_bonus: float,
+        remaining_upgrade_count: int,
+        max_visible_roll_count: int,
     ) -> list[str]:
         reasons = [
-            "未满级驱动盘",
+            "未满级驱动盘" if remaining_upgrade_count > 0 else "已满级驱动盘",
             f"包含 {effective_count:g} 条角色有效副词条",
             f"包含 {high_value_count:g} 条高价值副词条",
+            f"剩余 {remaining_upgrade_count:g} 次副词条升级机会",
+            f"当前等级最多已出现 {max_visible_roll_count:g} 次副词条",
         ]
         if main_reason:
             reasons.append(main_reason)
@@ -125,11 +163,93 @@ class CultivationAdvisor:
                 return value
         return ""
 
+    def _recommended_sets(
+        self,
+        build: dict[str, Any],
+        options: dict[str, Any] | None,
+    ) -> set[str]:
+        config_sets = None
+        if isinstance(options, dict):
+            config = options.get("config")
+            if isinstance(config, dict) and isinstance(config.get("preferred_sets"), dict):
+                config_sets = config.get("preferred_sets")
+        preferred_sets = config_sets if isinstance(config_sets, dict) else build.get("preferred_sets")
+        if not isinstance(preferred_sets, dict):
+            return set()
+
+        target_sets = {
+            value
+            for value in (
+                preferred_sets.get("target_set_4"),
+                preferred_sets.get("target_set_2"),
+            )
+            if isinstance(value, str) and value
+        }
+        alternatives = preferred_sets.get("alternatives")
+        if isinstance(alternatives, list):
+            for value in alternatives:
+                if isinstance(value, str) and value:
+                    target_sets.add(value)
+                elif isinstance(value, dict):
+                    for key in ("target_set_4", "target_set_2", "set_name", "set"):
+                        alt_set = value.get(key)
+                        if isinstance(alt_set, str) and alt_set:
+                            target_sets.add(alt_set)
+        return target_sets
+
+    def _set_name(self, disk: dict[str, Any]) -> str:
+        value = disk.get("set_name") or disk.get("set")
+        return value if isinstance(value, str) else ""
+
     def _level(self, disk: dict[str, Any]) -> int:
         try:
             return int(disk.get("level", 0))
         except (TypeError, ValueError):
             return 0
+
+    def _slot(self, disk: Any) -> int:
+        if not isinstance(disk, dict):
+            return 99
+        try:
+            slot = int(disk.get("slot", 99))
+        except (TypeError, ValueError):
+            return 99
+        return slot if 1 <= slot <= 6 else 99
+
+    def _remaining_upgrade_count(self, disk: dict[str, Any]) -> int:
+        level = self._level(disk)
+        if level >= 15:
+            return 0
+        if level >= 12:
+            return 1
+        if level >= 9:
+            return 2
+        if level >= 6:
+            return 3
+        if level >= 3:
+            return 4
+        return 5
+
+    def _max_visible_sub_stat_roll_count(self, disk: dict[str, Any]) -> int:
+        return 9 - self._remaining_upgrade_count(disk)
+
+    def _potential_score(
+        self,
+        weighted_roll_score: float,
+        max_stat_weight: float,
+        main_stat_factor: float,
+        remaining_upgrade_count: int,
+        max_visible_roll_count: int,
+    ) -> float:
+        if remaining_upgrade_count <= 0 or max_visible_roll_count <= 0 or max_stat_weight <= 0:
+            return 0.0
+        visible_quality = weighted_roll_score * 6.0 / max_stat_weight
+        quality_per_visible_roll = visible_quality / max_visible_roll_count
+        future_value = quality_per_visible_roll * remaining_upgrade_count
+        return round(min(55.0, future_value) * main_stat_factor, 4)
+
+    def _max_stat_weight(self, weights: dict[str, float]) -> float:
+        return max((weight for weight in weights.values() if weight > 0), default=0.0)
 
     def _option(
         self,

@@ -10,6 +10,7 @@ class DiscardAdvisor:
     def __init__(self, character_builds: dict[str, Any]) -> None:
         self.character_builds = character_builds
         self.optimizer = DiskOptimizer(character_builds)
+        self.cultivation_advisor = CultivationAdvisor(character_builds)
 
     def analyze_disks(
         self,
@@ -163,25 +164,52 @@ class DiscardAdvisor:
         preferred_main_stats: dict[int, list[str]],
         high_weight_threshold: float,
     ) -> dict[str, Any]:
+        sub_stats = self.optimizer._sub_stats(disk)
         sub_weights = [
-            self.optimizer._weight_for_stat(stat, weights)
-            for stat in self.optimizer._sub_stats(disk)
+            self.optimizer._weight_for_stat(stat, weights) for stat in sub_stats
         ]
         effective_count = sum(1 for weight in sub_weights if weight > 0)
         high_value_count = sum(1 for weight in sub_weights if weight >= high_weight_threshold)
-        current_score = self.optimizer.score_disk(disk, weights, preferred_main_stats)
-        _matched, main_factor, _bonus, _reason = CultivationAdvisor(
-            self.character_builds
-        )._main_stat_adjustment(disk, preferred_main_stats)
-        potential_score = round(
-            min(55.0, current_score + effective_count * 2.0 + high_value_count * 4.0)
-            * main_factor,
-            4,
+        effective_roll_count = sum(
+            self.optimizer._sub_stat_count(stat)
+            for stat, weight in zip(sub_stats, sub_weights)
+            if weight > 0
+        )
+        high_value_roll_count = sum(
+            self.optimizer._sub_stat_count(stat)
+            for stat, weight in zip(sub_stats, sub_weights)
+            if weight >= high_weight_threshold
+        )
+        weighted_roll_score = sum(
+            self.optimizer._sub_stat_count(stat) * weight
+            for stat, weight in zip(sub_stats, sub_weights)
+            if weight > 0
+        )
+        max_stat_weight = self.cultivation_advisor._max_stat_weight(weights)
+        _matched, main_factor, _bonus, _reason = (
+            self.cultivation_advisor._main_stat_adjustment(disk, preferred_main_stats)
+        )
+        remaining_upgrade_count = self.cultivation_advisor._remaining_upgrade_count(disk)
+        max_visible_roll_count = self.cultivation_advisor._max_visible_sub_stat_roll_count(
+            disk
+        )
+        potential_score = self.cultivation_advisor._potential_score(
+            weighted_roll_score,
+            max_stat_weight,
+            main_factor,
+            remaining_upgrade_count,
+            max_visible_roll_count,
         )
         return {
             "potential_score": potential_score,
             "effective_sub_stat_count": effective_count,
             "high_value_sub_stat_count": high_value_count,
+            "effective_sub_stat_roll_count": effective_roll_count,
+            "high_value_sub_stat_roll_count": high_value_roll_count,
+            "weighted_sub_stat_roll_score": round(weighted_roll_score, 4),
+            "max_stat_weight": max_stat_weight,
+            "remaining_upgrade_count": remaining_upgrade_count,
+            "max_visible_sub_stat_roll_count": max_visible_roll_count,
         }
 
     def _reasons(

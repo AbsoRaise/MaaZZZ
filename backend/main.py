@@ -10,7 +10,7 @@ from backend.service.cultivation_advisor import CultivationAdvisor
 from backend.service.discard_advisor import DiscardAdvisor
 from backend.service.disk_store import DiskStore
 from backend.service.disk_metadata import DiskMetadataStore
-from backend.service.maa_scanner import MaaScanner
+from backend.service.maa_scanner import MaaScanner, ScanCancelled
 from backend.service.optimizer import DiskOptimizer
 
 try:
@@ -36,6 +36,7 @@ class DesktopApi:
         self._window: Any = None
         self._scan_lock = threading.Lock()
         self._scan_running = False
+        self._scan_cancel_requested = False
 
     def bind_window(self, window: Any) -> dict[str, Any]:
         try:
@@ -169,6 +170,7 @@ class DesktopApi:
                 if self._scan_running:
                     return fail("MAA 扫描已在运行")
                 self._scan_running = True
+                self._scan_cancel_requested = False
 
             thread = threading.Thread(target=self._run_maa_scan, daemon=True)
             thread.start()
@@ -176,20 +178,39 @@ class DesktopApi:
         except Exception as exc:
             with self._scan_lock:
                 self._scan_running = False
+                self._scan_cancel_requested = False
+            return fail(exc)
+
+    def stop_maa_scan(self) -> dict[str, Any]:
+        try:
+            with self._scan_lock:
+                if not self._scan_running:
+                    return ok({"stopping": False, "running": False})
+                self._scan_cancel_requested = True
+            return ok({"stopping": True, "running": True})
+        except Exception as exc:
             return fail(exc)
 
     def _run_maa_scan(self) -> None:
         try:
             disks, logs = self.maa_scanner.run_scan(
-                on_progress=lambda payload: self._push_event("maa-progress", payload)
+                on_progress=lambda payload: self._push_event("maa-progress", payload),
+                cancel_requested=self._is_scan_cancel_requested,
             )
             record = self.disk_store.save_scan_result(disks, source="maa", logs=logs)
             self._push_event("maa-complete", record)
+        except ScanCancelled as exc:
+            self._push_event("maa-cancelled", {"message": str(exc) or "扫描已中止"})
         except Exception as exc:
             self._push_event("maa-error", {"error": str(exc)})
         finally:
             with self._scan_lock:
                 self._scan_running = False
+                self._scan_cancel_requested = False
+
+    def _is_scan_cancel_requested(self) -> bool:
+        with self._scan_lock:
+            return self._scan_cancel_requested
 
     def _push_event(self, event_name: str, payload: Any) -> None:
         if self._window is None:

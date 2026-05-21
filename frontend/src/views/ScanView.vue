@@ -74,6 +74,7 @@ const fallbackHistory = [
 ];
 
 const isScanning = ref(false);
+const isStoppingScan = ref(false);
 const progress = ref(0);
 const logs = ref([]);
 const currentDisks = ref([]);
@@ -94,11 +95,11 @@ const currentPage = ref(1);
 const pageSize = 12;
 const historyPage = ref(1);
 const historyPageSize = 8;
+const filtersCollapsed = ref(true);
 const filters = ref({
   diskType: '',
   rarity: '',
   slot: '',
-  stat: '',
   discard: '',
 });
 
@@ -122,7 +123,6 @@ const filteredDisks = computed(() => {
     if (filters.value.diskType && setNameOf(disk) !== filters.value.diskType) return false;
     if (filters.value.rarity && rarityOf(disk) !== filters.value.rarity) return false;
     if (filters.value.slot && String(disk?.slot || '') !== filters.value.slot) return false;
-    if (filters.value.stat && !diskHasStat(disk, filters.value.stat)) return false;
     const discard = discardEntryOf(disk);
     if (filters.value.discard === 'discard' && !discard?.discard_candidate) return false;
     if (filters.value.discard === 'keep' && discard?.discard_candidate) return false;
@@ -140,15 +140,6 @@ const historyDisplayPage = computed(() => Math.min(historyPage.value, historyTot
 const pagedHistory = computed(() => {
   const start = (historyDisplayPage.value - 1) * historyPageSize;
   return history.value.slice(start, start + historyPageSize);
-});
-const statOptions = computed(() => {
-  const values = new Set([...(metadata.value.main_stats || []), ...(metadata.value.sub_stats || [])]);
-  visibleDisks.value.forEach((disk) => {
-    const main = statName(disk.main_stat || disk.main);
-    if (main && main !== '-') values.add(main);
-    subStatsOf(disk).forEach((sub) => values.add(statName(sub)));
-  });
-  return [...values].filter(Boolean).sort((a, b) => a.localeCompare(b, 'zh-CN'));
 });
 const diskTypeOptions = computed(() => {
   const values = new Set(metadata.value.disk_types || []);
@@ -317,12 +308,8 @@ function normalizeWeights(raw) {
   return Object.fromEntries(Object.entries(raw).map(([key, value]) => [key, Number(value) || 0]));
 }
 
-function diskHasStat(disk, stat) {
-  return statName(disk?.main_stat || disk?.main) === stat || subStatsOf(disk).some((sub) => statName(sub) === stat);
-}
-
 function resetFilters() {
-  filters.value = { diskType: '', rarity: '', slot: '', stat: '', discard: '' };
+  filters.value = { diskType: '', rarity: '', slot: '', discard: '' };
   currentPage.value = 1;
 }
 
@@ -386,6 +373,9 @@ async function callApi(name, ...args) {
   if (name === 'start_maa_scan') {
     throw new Error('未连接到后端窗口，无法启动 Maa 扫描；请使用桌面窗口启动项目。');
   }
+  if (name === 'stop_maa_scan') {
+    throw new Error('未连接到后端窗口，无法中止 Maa 扫描；请使用桌面窗口启动项目。');
+  }
 
   return unwrapResponse(await mockApi(name, ...args));
 }
@@ -395,6 +385,9 @@ async function mockApi(name, scanId) {
 
   if (name === 'start_maa_scan') {
     throw new Error('未连接到后端窗口，无法启动 Maa 扫描；请使用桌面窗口启动项目。');
+  }
+  if (name === 'stop_maa_scan') {
+    throw new Error('未连接到后端窗口，无法中止 Maa 扫描；请使用桌面窗口启动项目。');
   }
 
   if (name === 'get_current_disks') return { disks: fallbackDisks };
@@ -446,6 +439,7 @@ async function handleComplete(event) {
   try {
     const payload = eventPayload(event);
     isScanning.value = false;
+    isStoppingScan.value = false;
     progress.value = 100;
     addLog(payload?.message || '扫描完成。');
 
@@ -465,8 +459,43 @@ function handleError(event) {
   const rawPayload = event?.detail ?? event;
   const payload = isEnvelope(rawPayload) && rawPayload.success === false ? rawPayload : rawPayload;
   isScanning.value = false;
+  isStoppingScan.value = false;
   lastError.value = payload?.message || payload?.error || errorMessageOf(payload) || '扫描失败';
   addLog(`错误：${lastError.value}`);
+}
+
+function handleCancelled(event) {
+  const payload = event?.detail ?? event;
+  isScanning.value = false;
+  isStoppingScan.value = false;
+  addLog(payload?.message || '扫描已中止。');
+}
+
+async function toggleScan() {
+  if (isScanning.value) {
+    await stopScan();
+    return;
+  }
+  await startScan();
+}
+
+async function stopScan() {
+  if (isStoppingScan.value) return;
+  isStoppingScan.value = true;
+  addLog('正在请求中止扫描。');
+  try {
+    const result = await callApi('stop_maa_scan');
+    if (result?.stopping === false) {
+      isScanning.value = false;
+      isStoppingScan.value = false;
+      addLog('当前没有正在运行的扫描任务。');
+    } else {
+      addLog('已发送中止请求，等待当前识别步骤收尾。');
+    }
+  } catch (error) {
+    isStoppingScan.value = false;
+    handleError({ detail: { message: errorMessageOf(error) } });
+  }
 }
 
 async function startScan() {
@@ -477,6 +506,7 @@ async function startScan() {
   progress.value = 0;
   logs.value = [];
   isScanning.value = true;
+  isStoppingScan.value = false;
   addLog('启动扫描任务。');
   addLog('提示：扫描不会自动切到游戏前台，但会在后台控制绝区零窗口；扫描期间请不要手动点击仓库。');
 
@@ -626,6 +656,7 @@ onMounted(async () => {
   window.addEventListener('maa-progress', handleProgress);
   window.addEventListener('maa-complete', handleComplete);
   window.addEventListener('maa-error', handleError);
+  window.addEventListener('maa-cancelled', handleCancelled);
   await waitForApi();
   await Promise.all([refreshCurrentDisks(), refreshHistory(), refreshMetadata(), refreshCharacterBuilds()]);
   await refreshDiscardAnalysis();
@@ -636,6 +667,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('maa-progress', handleProgress);
   window.removeEventListener('maa-complete', handleComplete);
   window.removeEventListener('maa-error', handleError);
+  window.removeEventListener('maa-cancelled', handleCancelled);
 });
 </script>
 
@@ -648,10 +680,11 @@ onBeforeUnmount(() => {
           <button
             class="w-full rounded-sm border-4 border-[#f6ce00] bg-[#f6ce00] px-5 py-4 text-left font-mono text-sm font-black uppercase text-zinc-950 transition duration-100 hover:-translate-y-1 hover:bg-zinc-950 hover:text-[#f6ce00] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
             type="button"
-            :disabled="isScanning"
-            @click="startScan"
+            :class="{ 'border-red-400 bg-red-400 hover:text-red-300': isScanning }"
+            :disabled="isStoppingScan"
+            @click="toggleScan"
           >
-            {{ isScanning ? '扫描中...' : '启动扫描' }}
+            {{ isStoppingScan ? '正在中止...' : isScanning ? '中止扫描' : '启动扫描' }}
           </button>
 
           <p v-if="isScanning" class="border-l-4 border-[#f6ce00] bg-zinc-950 p-3 font-mono text-xs font-black text-zinc-200">
@@ -721,12 +754,20 @@ onBeforeUnmount(() => {
       <div class="panel">
         <div class="panel-title flex items-center justify-between gap-3">
           <span>{{ selectedScan ? '历史详情' : '驱动盘列表' }}</span>
-          <span class="text-zinc-400">{{ filteredDisks.length }} / {{ visibleDisks.length }} 枚</span>
-          <button v-if="selectedScan" class="hard-button py-1" type="button" @click="returnToCurrentDisks">
-            返回当前
-          </button>
+          <div class="flex shrink-0 items-center gap-2">
+            <span class="text-zinc-400">{{ filteredDisks.length }} / {{ visibleDisks.length }} 枚</span>
+            <button class="hard-button py-1" type="button" @click="filtersCollapsed = !filtersCollapsed">
+              {{ filtersCollapsed ? '展开筛选' : '收起筛选' }}
+            </button>
+            <button v-if="selectedScan" class="hard-button py-1" type="button" @click="returnToCurrentDisks">
+              返回当前
+            </button>
+          </div>
         </div>
-        <div class="grid gap-3 border-b-4 border-zinc-800 p-4 md:grid-cols-6">
+        <div v-if="filtersCollapsed" class="border-b-4 border-zinc-800 px-4 py-3 font-mono text-xs font-bold text-zinc-500">
+          筛选已收起。当前可弃置 {{ discardStats.discardable }} 枚。
+        </div>
+        <div v-if="!filtersCollapsed" class="grid gap-3 border-b-4 border-zinc-800 p-4 md:grid-cols-5">
           <label class="block">
             <span class="field-label">驱动盘类型</span>
             <select v-model="filters.diskType" class="hard-input mt-2 w-full">
@@ -749,13 +790,6 @@ onBeforeUnmount(() => {
             </select>
           </label>
           <label class="block">
-            <span class="field-label">词条</span>
-            <select v-model="filters.stat" class="hard-input mt-2 w-full">
-              <option value="">全部</option>
-              <option v-for="item in statOptions" :key="item" :value="item">{{ item }}</option>
-            </select>
-          </label>
-          <label class="block">
             <span class="field-label">弃置标记</span>
             <select v-model="filters.discard" class="hard-input mt-2 w-full">
               <option value="">全部</option>
@@ -767,7 +801,7 @@ onBeforeUnmount(() => {
             <button class="hard-button w-full" type="button" @click="resetFilters">重置筛选</button>
           </div>
         </div>
-        <div class="grid gap-3 border-b-4 border-zinc-800 p-4 md:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
+        <div v-if="!filtersCollapsed" class="grid gap-3 border-b-4 border-zinc-800 p-4 md:grid-cols-[repeat(4,minmax(0,1fr))_auto]">
           <label class="block">
             <span class="field-label">排名阈值</span>
             <input v-model.number="discardOptions.top_rank_limit" class="hard-input mt-2 w-full" min="1" step="1" type="number" />
