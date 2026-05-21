@@ -9,6 +9,7 @@ from backend.service.maa_scanner import (
     MaaScanner,
     _is_confirmed_empty_cell,
     _reached_bottom_after_bottom_click,
+    _scan_strategy,
     _should_accept_detail_after_click,
     _should_stop_at_empty_or_unmatched_cell,
     grid_cells_from_template_matches,
@@ -93,6 +94,19 @@ def test_run_scan_falls_back_when_maaframework_disabled(temp_dir):
     assert len(disks) == 2
     assert runtime.calls == []
     assert logs[-1] == "Maa 占位扫描完成"
+
+
+def test_scan_strategy_defaults_to_legacy_template(temp_dir):
+    scanner = MaaScanner(resource_root=temp_dir / "resources")
+
+    assert _scan_strategy(scanner.profile) == "legacy_template"
+
+
+def test_scan_strategy_can_select_row_major_template(temp_dir):
+    scanner = MaaScanner(resource_root=temp_dir / "resources")
+    profile = scanner.profile | {"maa": scanner.profile["maa"] | {"scan_strategy": "row_major_template"}}
+
+    assert _scan_strategy(profile) == "row_major_template"
 
 
 def test_locate_disk_returns_visible_grid_click_coordinates(temp_dir):

@@ -122,6 +122,12 @@ class MaaFrameworkRuntime:
         }
 
     def scan_visible_grid(self, profile: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
+        strategy = _scan_strategy(profile)
+        if strategy in {"row_major_template", "template_row_major"}:
+            return self._scan_visible_grid_row_major(profile)
+        return self._scan_visible_grid_legacy(profile)
+
+    def _scan_visible_grid_legacy(self, profile: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
         if self.tasker is None or self.controller is None:
             raise RuntimeError("Maa Tasker 尚未初始化")
 
@@ -361,6 +367,235 @@ class MaaFrameworkRuntime:
 
         return disks, logs
 
+    def _scan_visible_grid_row_major(self, profile: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
+        if self.tasker is None or self.controller is None:
+            raise RuntimeError("Maa Tasker is not initialized")
+
+        from maa.pipeline import JOCR, JRecognitionType
+
+        maa_config = _dict_or_empty(profile.get("maa"))
+        grid = _dict_or_empty(maa_config.get("visible_grid"))
+        strategy_config = _dict_or_empty(grid.get("row_major_template"))
+        rows = int(grid.get("rows") or 0)
+        columns = int(grid.get("columns") or 0)
+        max_scan_rows = int(grid.get("max_scan_rows") or 400)
+        auto_scroll_trigger_row = int(grid.get("auto_scroll_trigger_row") or rows)
+        stable_selected_row = int(grid.get("stable_selected_row") or max(1, rows - 1))
+        first = grid.get("first_cell_center")
+        gap = grid.get("cell_gap")
+        if rows <= 0 or columns <= 0 or not _is_pair(first) or not _is_pair(gap):
+            raise ValueError("maa.visible_grid requires rows/columns/first_cell_center/cell_gap")
+
+        detail_roi = _rect_or_default(maa_config.get("detail_ocr_roi"), [1380, 258, 470, 540])
+        scan_page = int(maa_config.get("scan_page") or 1)
+        actions = _dict_or_empty(profile.get("actions"))
+        click_delay = float(actions.get("detail_open_delay_ms") or 120) / 1000
+        auto_scroll_delay = float(actions.get("auto_scroll_delay_ms") or max(180, int(click_delay * 1000))) / 1000
+        auto_scroll_settle_delay = float(actions.get("auto_scroll_settle_delay_ms") or 200) / 1000
+        selected_retry_delay = float(actions.get("selected_retry_delay_ms") or 80) / 1000
+        selected_retries = max(1, int(strategy_config.get("selected_retries") or 3))
+        max_consecutive_unknown_cells = int(actions.get("max_consecutive_unknown_cells") or (columns + 3))
+        match_config = _dict_or_empty(grid.get("template_match"))
+        grid_roi = _rect_or_default(match_config.get("roi"), [70, 160, 1280, 790])
+        scroll_change_threshold = float(actions.get("scroll_change_threshold") or 2.3)
+        detail_change_threshold = float(actions.get("detail_change_threshold") or 3.0)
+        disks: list[dict[str, Any]] = []
+        logs: list[str] = _LiveLogList(self.debug_dir / "latest_logs.txt")
+        logs.append("scanner_strategy=row_major_template_v1")
+        cached_grid_cells: list[dict[str, Any]] | None = None
+        cached_empty_cells: list[dict[str, Any]] | None = None
+        consecutive_unknown_cells = 0
+
+        def describe_cell(cell: dict[str, Any] | None) -> str:
+            if not cell:
+                return "none"
+            return (
+                f"row={cell.get('row')},col={cell.get('column')},"
+                f"score={float(cell.get('score') or 0):.3f},source={cell.get('source')},"
+                f"x={cell.get('x')},y={cell.get('y')}"
+            )
+
+        def refresh_cells() -> None:
+            nonlocal cached_grid_cells, cached_empty_cells
+            cached_grid_cells = self._detect_visible_grid_cells(profile, rows, columns)
+            cached_empty_cells = self._detect_empty_grid_cells(profile, rows, columns)
+            logs.append(
+                f"row_major refresh disk_cells={len(cached_grid_cells or [])} "
+                f"empty_cells={len(cached_empty_cells or [])}"
+            )
+
+        def capture_grid_snapshot() -> Any:
+            self.controller.post_screencap().wait()
+            return _image_roi_copy(self.controller.cached_image, _scale_roi(grid_roi, profile, self.controller.cached_image))
+
+        def detect_selected_column_one() -> dict[str, Any] | None:
+            selected_cell: dict[str, Any] | None = None
+            for attempt in range(1, selected_retries + 1):
+                selected_cell = self._detect_selected_grid_cell(profile, rows, columns, expected_column=1)
+                logs.append(f"row_major selected retry={attempt}/{selected_retries} selected={describe_cell(selected_cell)}")
+                if selected_cell is not None:
+                    return selected_cell
+                time.sleep(selected_retry_delay)
+            return selected_cell
+
+        def mark_unknown(reason: str) -> str:
+            nonlocal consecutive_unknown_cells
+            logs.append(reason)
+            consecutive_unknown_cells += 1
+            if consecutive_unknown_cells >= max_consecutive_unknown_cells:
+                logs.append(f"row_major stop: consecutive_unknown_cells={consecutive_unknown_cells}")
+                return "empty"
+            return "unknown"
+
+        def click_and_read(logical_row: int, visual_row: int, column: int, delay: float) -> str:
+            nonlocal cached_grid_cells, cached_empty_cells, consecutive_unknown_cells
+            if cached_grid_cells is None:
+                refresh_cells()
+            matched_cell = _cell_by_row_column(cached_grid_cells, visual_row, column)
+            empty_cell = _cell_by_row_column(cached_empty_cells, visual_row, column)
+            stop_reason = _empty_stop_reason(cached_empty_cells, cached_grid_cells, visual_row, column)
+            logs.append(
+                f"row_major decision logical_row={logical_row} visual_row={visual_row} column={column}: "
+                f"disk={describe_cell(matched_cell)} empty={describe_cell(empty_cell)} "
+                f"stop_reason={stop_reason or 'none'}"
+            )
+            if stop_reason is not None:
+                logs.append(f"row_major stop: empty at logical_row={logical_row} visual_row={visual_row} column={column}")
+                return "empty"
+
+            x = int(first[0] + (column - 1) * gap[0])
+            y = int(first[1] + (visual_row - 1) * gap[1])
+            click_source = "fallback"
+            if matched_cell is not None:
+                x = matched_cell["x"]
+                y = matched_cell["y"]
+                click_source = str(matched_cell.get("source") or "template")
+            elif self.controller.cached_image is not None:
+                x, y = _scale_point_to_image(x, y, profile, self.controller.cached_image)
+
+            logs.append(
+                f"row_major click logical_row={logical_row} visual_row={visual_row} column={column} "
+                f"target=({x},{y}) source={click_source}"
+            )
+
+            try:
+                self.controller.post_screencap().wait()
+                before_image = self.controller.cached_image
+                before_detail = _image_roi_copy(before_image, _scale_roi(detail_roi, profile, before_image))
+                self.controller.post_click(x, y).wait()
+                time.sleep(delay)
+                self.controller.post_screencap().wait()
+                image = self.controller.cached_image
+                scaled_roi = _scale_roi(detail_roi, profile, image)
+                after_detail = _image_roi_copy(image, scaled_roi)
+                detail_delta = _mean_abs_image_delta(before_detail, after_detail)
+                job = self.tasker.post_recognition(
+                    JRecognitionType.OCR,
+                    JOCR(roi=scaled_roi),
+                    image,
+                )
+                job.wait()
+                disk = parse_detail_ocr_results(
+                    self._ocr_results_from_task(job.get()),
+                    inventory_pos={
+                        "page": scan_page,
+                        "row": logical_row,
+                        "column": column,
+                        "index": (logical_row - 1) * columns + column,
+                    },
+                )
+            except Exception as exc:
+                logs.append(f"row_major skip: click/read failed logical_row={logical_row} column={column}: {exc}")
+                return "error"
+
+            if disk is None:
+                return mark_unknown(f"row_major unknown: no detail logical_row={logical_row} column={column}")
+
+            if not _should_accept_detail_after_click(
+                detail_delta=detail_delta,
+                detail_change_threshold=detail_change_threshold,
+                matched_cell=matched_cell,
+            ):
+                return mark_unknown(
+                    f"row_major unknown: unchanged detail logical_row={logical_row} column={column} "
+                    f"delta={detail_delta:.3f} threshold={detail_change_threshold:.3f}"
+                )
+
+            disks.append(validate_disk(disk))
+            consecutive_unknown_cells = 0
+            logs.append(
+                f"row_major recognized logical_row={logical_row} visual_row={visual_row} "
+                f"column={column} source={click_source} delta={detail_delta:.3f}: "
+                f"{disk['set_name']} [{disk['slot']}]"
+            )
+            return "disk"
+
+        def scan_columns(logical_row: int, visual_row: int, start_column: int) -> str:
+            for column in range(start_column, columns + 1):
+                status = click_and_read(logical_row, visual_row, column, click_delay)
+                if status == "empty":
+                    return "empty"
+            return "done"
+
+        logical_row = 1
+        refresh_cells()
+        while logical_row <= max_scan_rows:
+            if logical_row < auto_scroll_trigger_row:
+                if scan_columns(logical_row, logical_row, 1) == "empty":
+                    break
+                logical_row += 1
+                continue
+
+            logs.append(f"row_major bottom probe logical_row={logical_row} column=1 visual_row={auto_scroll_trigger_row}")
+            grid_before_click = capture_grid_snapshot()
+            status = click_and_read(logical_row, auto_scroll_trigger_row, 1, auto_scroll_delay)
+            if status == "empty":
+                break
+
+            time.sleep(auto_scroll_settle_delay)
+            grid_after_click = capture_grid_snapshot()
+            scroll_delta = _mean_abs_image_delta(grid_before_click, grid_after_click)
+            selected_cell = detect_selected_column_one()
+            selected_row = int(selected_cell.get("row") or 0) if selected_cell else 0
+            reached_bottom = _reached_bottom_after_bottom_click(
+                scroll_delta=scroll_delta,
+                scroll_change_threshold=scroll_change_threshold,
+                selected_row=selected_row,
+                auto_scroll_trigger_row=auto_scroll_trigger_row,
+                stable_selected_row=stable_selected_row,
+            )
+            logs.append(
+                f"row_major bottom result logical_row={logical_row} scroll_delta={scroll_delta:.3f} "
+                f"threshold={scroll_change_threshold:.3f} selected={describe_cell(selected_cell)} "
+                f"reached_bottom={reached_bottom}"
+            )
+
+            cached_grid_cells = None
+            cached_empty_cells = None
+            if reached_bottom:
+                refresh_cells()
+                scan_columns(logical_row, auto_scroll_trigger_row, 2)
+                break
+
+            continuation_row = selected_row if selected_row > 0 else stable_selected_row
+            if continuation_row != stable_selected_row:
+                logs.append(
+                    f"row_major abnormal selected_row={continuation_row}; "
+                    f"continue with stable_selected_row={stable_selected_row}"
+                )
+                continuation_row = stable_selected_row
+            refresh_cells()
+            if scan_columns(logical_row, continuation_row, 2) == "empty":
+                break
+            logical_row += 1
+            cached_grid_cells = None
+            cached_empty_cells = None
+
+        if logical_row > max_scan_rows:
+            logs.append(f"row_major stop: max_scan_rows={max_scan_rows}")
+
+        return disks, logs
+
     def _detect_visible_grid_cells(self, profile: dict[str, Any], rows: int, columns: int) -> list[dict[str, Any]]:
         if self.tasker is None or self.controller is None:
             return []
@@ -384,6 +619,8 @@ class MaaFrameworkRuntime:
         dedupe_tolerance = _pair_or_default(match_config.get("dedupe_tolerance"), [55, 55])
         row_tolerance = int(match_config.get("row_tolerance") or 70)
         order_by = str(match_config.get("order_by") or "Vertical")
+        method = int(match_config.get("method") or 5)
+        green_mask = bool(match_config.get("green_mask"))
         box_coordinate_space = str(match_config.get("box_coordinate_space") or "auto")
         first = match_config.get("first_cell_center")
         if not _is_pair(first) and _is_pair(grid.get("first_cell_center")):
@@ -397,7 +634,14 @@ class MaaFrameworkRuntime:
         scaled_gap = _scale_pair_to_image(grid.get("cell_gap"), profile, image) if _is_pair(grid.get("cell_gap")) else grid.get("cell_gap")
         job = self.tasker.post_recognition(
             JRecognitionType.TemplateMatch,
-            JTemplateMatch(template=templates, roi=scaled_roi, threshold=threshold, order_by=order_by),
+            JTemplateMatch(
+                template=templates,
+                roi=scaled_roi,
+                threshold=threshold,
+                order_by=order_by,
+                method=method,
+                green_mask=green_mask,
+            ),
             image,
         )
         job.wait()
@@ -422,6 +666,8 @@ class MaaFrameworkRuntime:
                 "scaled_roi": list(scaled_roi),
                 "templates": templates,
                 "threshold": threshold,
+                "method": method,
+                "green_mask": green_mask,
                 "click_offset": click_offset,
                 "dedupe_tolerance": dedupe_tolerance,
                 "row_tolerance": row_tolerance,
@@ -491,6 +737,8 @@ class MaaFrameworkRuntime:
         click_offset = _pair_or_default(match_config.get("click_offset"), [62, 59])
         dedupe_tolerance = _pair_or_default(match_config.get("dedupe_tolerance"), [55, 55])
         row_tolerance = int(match_config.get("row_tolerance") or 70)
+        method = int(match_config.get("method") or 5)
+        green_mask = bool(match_config.get("green_mask"))
         box_coordinate_space = str(match_config.get("box_coordinate_space") or "auto")
         first = match_config.get("first_cell_center")
         if not _is_pair(first) and _is_pair(grid.get("first_cell_center")):
@@ -502,7 +750,14 @@ class MaaFrameworkRuntime:
         scaled_roi = _scale_roi(roi, profile, image)
         job = self.tasker.post_recognition(
             JRecognitionType.TemplateMatch,
-            JTemplateMatch(template=templates, roi=scaled_roi, threshold=threshold, order_by="Vertical"),
+            JTemplateMatch(
+                template=templates,
+                roi=scaled_roi,
+                threshold=threshold,
+                order_by="Vertical",
+                method=method,
+                green_mask=green_mask,
+            ),
             image,
         )
         job.wait()
@@ -787,6 +1042,13 @@ class MaaScanner:
 
 def _dict_or_empty(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
+
+
+def _scan_strategy(profile: dict[str, Any]) -> str:
+    maa_config = _dict_or_empty(profile.get("maa"))
+    grid = _dict_or_empty(maa_config.get("visible_grid"))
+    raw = maa_config.get("scan_strategy") or grid.get("scan_strategy") or "legacy_template"
+    return str(raw).strip().lower()
 
 
 class _LiveLogList(list[str]):
